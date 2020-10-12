@@ -1,4 +1,5 @@
-﻿using Grpc.Core;
+﻿using Client.Commands;
+using Grpc.Core;
 using Grpc.Net.Client;
 using Server;
 using System;
@@ -8,7 +9,26 @@ namespace Client
 {
     class Program
     {
+        private static CommandExecutor commands;
+
         static async Task Main(string[] args)
+        {
+            //await DoGrpcStuff();
+
+            commands = new CommandExecutor();
+
+            // FAIL CASES
+            commands.Run("wait    ");
+            commands.Run("wait    10   32  ");
+
+            // SUCCESS CASES
+            commands.Run("wait    10");
+            commands.Run("wait 10");
+
+            Console.ReadLine();
+        }
+
+        private static async Task DoGrpcStuff()
         {
             GrpcChannel channel = GrpcChannel.ForAddress("https://localhost:5001");
 
@@ -31,8 +51,6 @@ namespace Client
                     Console.WriteLine("New customer: {0} {1}", customer.FirstName, customer.LastName);
                 }
             }
-
-            Console.ReadLine();
         }
     }
 }
