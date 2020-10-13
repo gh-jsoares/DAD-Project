@@ -13,29 +13,30 @@ namespace Client.Commands
 
         public void Execute(params string[] Args)
         {
-            if(Args.Length != NumArgs)
+            ValidadeArgs(Args);
+            SafeExecute(Args);
+        }
+
+        protected void ValidadeArgs(string[] Args)
+        {
+            if (Args.Length != NumArgs)
             {
                 // throw custom exception
                 throw new Exception(string.Format("Missing arguments. Syntax: {0} {1}", Name, Syntax));
             }
-            SafeExecute(Args);
         }
 
-        void SafeExecute(params string[] Args);
+        protected void SafeExecute(params string[] Args);
     }
 
     interface ICommand<T> : ICommand
     {
-        new T Execute(params string[] Args)
+        public new T Execute(params string[] Args)
         {
-            if(Args.Length != NumArgs)
-            {
-                // throw custom exception
-                throw new Exception(string.Format("Missing arguments. Syntax: {0} {1}", Name, Syntax));
-            }
+            ValidadeArgs(Args);
             return SafeExecute(Args);
         }
 
-        new T SafeExecute(params string[] Args);
+        protected new T SafeExecute(params string[] Args);
     }
 }

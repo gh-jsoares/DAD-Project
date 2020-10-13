@@ -5,13 +5,13 @@ using System.Text;
 
 namespace Client.Scripts.Commands
 {
-    class WaitCommand : ICommand
+    class ListServerCommand : ICommand
     {
-        public string Name => "wait";
+        public string Name => "listServer";
 
-        public string Syntax => "x";
+        public string Syntax => "server_id";
 
-        public string Description => "Delays the execution of the next command for x milliseconds.";
+        public string Description => "Lists all objects stored on the server identified by _server_id and whether the serveris the master replica for that object or not";
 
         public int NumArgs => 1;
 

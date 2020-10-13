@@ -5,15 +5,15 @@ using System.Text;
 
 namespace Client.Scripts.Commands
 {
-    class WaitCommand : ICommand
+    class EndRepeatCommand : ICommand
     {
-        public string Name => "wait";
+        public string Name => "end-repeat";
 
-        public string Syntax => "x";
+        public string Syntax => "";
 
-        public string Description => "Delays the execution of the next command for x milliseconds.";
+        public string Description => "Closes a repeat loop.";
 
-        public int NumArgs => 1;
+        public int NumArgs => 0;
 
         void ICommand.SafeExecute(params string[] Args)
         {

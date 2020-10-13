@@ -1,4 +1,5 @@
 ﻿using Client.Scripts.Commands;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,8 +24,7 @@ namespace Client.Commands
 
             if (SplitInput.Length == 0)
             {
-                // TODO: use logger
-                Console.WriteLine("No command specified");
+                Console.Error.WriteLine("No command specified");
                 return;
             }
 
@@ -35,8 +35,7 @@ namespace Client.Commands
             ICommand Command = commands.Where((c) => c.Name == Name).FirstOrDefault();
             if (Command == null)
             {
-                // TODO: use logger
-                Console.WriteLine("Command not found");
+                Console.Error.WriteLine("No command found for {0}", Name);
                 return;
             }
 
@@ -46,8 +45,7 @@ namespace Client.Commands
             }
             catch (Exception e)
             {
-                // TODO: use logger
-                Console.WriteLine(e.Message);
+                Console.Error.WriteLine(e.Message);
             }
         }
     }
