@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option csharp_namespace = "ProcessCreationService";
+
+service CommandListener {
+  rpc ReceiveCommand (CommandRequest) returns (CommandReply);
+}
+
+message CommandRequest {
+  string command = 1;
+}
+
+message CommandReply {
+  bool ok = 1;
+  string error = 2;
+}
