@@ -25,6 +25,11 @@ namespace Client
             commands.Run("wait    10");
             commands.Run("wait 10");
 
+            Console.WriteLine($"{args.Length}");
+
+            if (args.Length == 3)
+                Console.WriteLine($"Client created with arguments: {args[0]} {args[1]} {args[2]}");
+
             Console.ReadLine();
         }
 

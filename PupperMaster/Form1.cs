@@ -13,11 +13,13 @@ namespace PuppetMaster
     public partial class Form1 : Form
     {
 
-        PuppetMasterLogic pml = new PuppetMasterLogic();
+        PuppetMasterLogic pml;
 
-        public Form1()
+        public Form1(ConfigReader cr)
         {
             InitializeComponent();
+
+            pml = new PuppetMasterLogic(cr);
         }
 
         private void btnSendCommand_Click(object sender, EventArgs e)

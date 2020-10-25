@@ -23,6 +23,7 @@ namespace ProcessCreationService.Scripts.Commands
 
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.FileName = @"..\..\..\..\Client\bin\Debug\netcoreapp3.1\Client.exe";
+            startInfo.Arguments = @$"{Args[0]} {Args[1]} {Args[2]}";
             startInfo.UseShellExecute = true;
             startInfo.CreateNoWindow = false;
             startInfo.WindowStyle = ProcessWindowStyle.Normal;

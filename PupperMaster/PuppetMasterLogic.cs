@@ -10,13 +10,27 @@ namespace PuppetMaster
         private GrpcChannel channel;
         private CommandListener.CommandListenerClient pcs;
 
-        public PuppetMasterLogic()
+        public PuppetMasterLogic(ConfigReader cr)
         {
 
-            AppContext.SetSwitch(
+            cr.printPcss();
+
+            if(cr == null)
+            {
+                AppContext.SetSwitch(
             "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            channel = GrpcChannel.ForAddress("http://localhost:10000");
-            pcs = new CommandListener.CommandListenerClient(channel);
+                channel = GrpcChannel.ForAddress("http://localhost:10000");
+                pcs = new CommandListener.CommandListenerClient(channel);
+            }
+            else                                                        //Apenas implementado para quando so ha 1 PCS
+            {
+                AppContext.SetSwitch(
+            "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+                channel = GrpcChannel.ForAddress(cr.Pcss[0]);
+                pcs = new CommandListener.CommandListenerClient(channel);
+            }
+
+            
 
         }
 

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "PuppetMaster": {
+      "commandName": "Project",
+      "commandLineArgs": "config_1.txt"
+    }
+  }
+}

@@ -32,7 +32,8 @@
             this.tbCommand = new System.Windows.Forms.TextBox();
             this.tbFileName = new System.Windows.Forms.TextBox();
             this.btnSendCommand = new System.Windows.Forms.Button();
-            this.btnUploadFile = new System.Windows.Forms.Button();
+            this.btnStep = new System.Windows.Forms.Button();
+            this.btnSequence = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // tbCommandLog
@@ -69,21 +70,31 @@
             this.btnSendCommand.UseVisualStyleBackColor = true;
             this.btnSendCommand.Click += new System.EventHandler(this.btnSendCommand_Click);
             // 
-            // btnUploadFile
+            // btnStep
             // 
-            this.btnUploadFile.Location = new System.Drawing.Point(824, 68);
-            this.btnUploadFile.Name = "btnUploadFile";
-            this.btnUploadFile.Size = new System.Drawing.Size(128, 23);
-            this.btnUploadFile.TabIndex = 3;
-            this.btnUploadFile.Text = "Upload File";
-            this.btnUploadFile.UseVisualStyleBackColor = true;
+            this.btnStep.Location = new System.Drawing.Point(866, 68);
+            this.btnStep.Name = "btnStep";
+            this.btnStep.Size = new System.Drawing.Size(86, 23);
+            this.btnStep.TabIndex = 3;
+            this.btnStep.Text = "Step by step";
+            this.btnStep.UseVisualStyleBackColor = true;
+            // 
+            // btnSequence
+            // 
+            this.btnSequence.Location = new System.Drawing.Point(731, 68);
+            this.btnSequence.Name = "btnSequence";
+            this.btnSequence.Size = new System.Drawing.Size(129, 23);
+            this.btnSequence.TabIndex = 4;
+            this.btnSequence.Text = "Execute Sequentially";
+            this.btnSequence.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(991, 450);
-            this.Controls.Add(this.btnUploadFile);
+            this.Controls.Add(this.btnSequence);
+            this.Controls.Add(this.btnStep);
             this.Controls.Add(this.btnSendCommand);
             this.Controls.Add(this.tbFileName);
             this.Controls.Add(this.tbCommand);
@@ -102,7 +113,8 @@
         private System.Windows.Forms.TextBox tbCommand;
         private System.Windows.Forms.TextBox tbFileName;
         private System.Windows.Forms.Button btnSendCommand;
-        private System.Windows.Forms.Button btnUploadFile;
+        private System.Windows.Forms.Button btnStep;
+        private System.Windows.Forms.Button btnSequence;
     }
 }
 
