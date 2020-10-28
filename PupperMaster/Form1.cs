@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using ProcessCreationService;
 
 namespace PuppetMaster
 {
@@ -14,6 +16,8 @@ namespace PuppetMaster
     {
 
         PuppetMasterLogic pml;
+
+        Queue commandsList = new Queue();
 
         public Form1(ConfigReader cr)
         {
@@ -24,17 +28,44 @@ namespace PuppetMaster
 
         private void btnSendCommand_Click(object sender, EventArgs e)
         {
-            tbCommandLog.Text += pml.SendCommand(tbCommand.Text).ToString() + "\r\n";
+            CommandReply cr = pml.SendCommand(tbCommand.Text);
+
+            tbCommandLog.Text += cr.Error + "\r\n";
 
         }
 
-        private void tbCommandLog_TextChanged(object sender, EventArgs e)
+        private void btnSequence_Click(object sender, EventArgs e)
         {
+            string[] commands = System.IO.File.ReadAllLines(@"..\..\..\files\scripts\" + tbFileName.Text);
 
+            foreach(string c in commands)
+            {
+                CommandReply cr = pml.SendCommand(c);
+
+                tbCommandLog.Text += cr.Error + "\r\n";
+            }
         }
 
-        private void label1_Click(object sender, EventArgs e)
+        private void btnStep_Click(object sender, EventArgs e)
         {
+            string[] commands = System.IO.File.ReadAllLines(@"..\..\..\files\scripts\" + tbFileName.Text);
+
+            commandsList = new Queue(commands);
+
+            btnNextStep.Enabled = true;
+        }
+
+        private void btnNextStep_Click(object sender, EventArgs e)
+        {
+
+            string command = (string) commandsList.Dequeue();
+
+            CommandReply cr = pml.SendCommand(command);
+
+            tbCommandLog.Text += cr.Error + "\r\n";
+
+            if(commandsList.Count == 0)
+                btnNextStep.Enabled = false;
 
         }
     }

@@ -26,14 +26,18 @@ namespace ProcessCreationService.Commands
             commands.Add(new WaitCommand());
         }
 
-        public bool Run(string Input)
+        public CommandReply Run(string Input)
         {
             string[] SplitInput = Regex.Replace(Input.Trim(), @"\s+", " ").Split(" ");
+
+            CommandReply cr = new CommandReply { };
 
             if (SplitInput.Length == 0)
             {
                 Console.Error.WriteLine("No command specified");
-                return false;
+                cr.Ok = false;
+                cr.Error = "No command specified";
+                return cr;
             }
 
             string Name = SplitInput[0];
@@ -44,22 +48,26 @@ namespace ProcessCreationService.Commands
             if (Command == null)
             {
                 Console.Error.WriteLine("No command found for {0}", Name);
-                return false;
+                cr.Ok = false;
+                cr.Error = $"No command found for {Name}";
+                return cr;
             }
 
             try
             {
-                Command.Execute(ArgsList.ToArray());
+                cr = Command.Execute(ArgsList.ToArray());
 
             }
             catch (Exception e)
             {
                 Console.Error.WriteLine(e.Message);
 
-                return false;
+                cr.Ok = false;
+                cr.Error = e.Message;
+                return cr;
             }
 
-            return true;
+            return cr;
         }
     }
 }

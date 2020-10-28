@@ -13,4 +13,7 @@ message CommandRequest {
 message CommandReply {
   bool ok = 1;
   string error = 2;
+  string type = 3;
+  string id = 4;
+  string url = 5;
 }

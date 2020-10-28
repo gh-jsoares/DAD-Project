@@ -28,12 +28,7 @@ namespace ProcessCreationService
 
             Console.WriteLine($"Received new command request: {commandText}");
 
-            bool checkOk = commands.Run(commandText);
-
-            return new CommandReply
-            {
-                Ok = checkOk
-            };
+            return commands.Run(commandText);
         }
 
     }

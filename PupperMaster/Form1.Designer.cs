@@ -34,6 +34,7 @@
             this.btnSendCommand = new System.Windows.Forms.Button();
             this.btnStep = new System.Windows.Forms.Button();
             this.btnSequence = new System.Windows.Forms.Button();
+            this.btnNextStep = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // tbCommandLog
@@ -44,7 +45,6 @@
             this.tbCommandLog.ReadOnly = true;
             this.tbCommandLog.Size = new System.Drawing.Size(360, 336);
             this.tbCommandLog.TabIndex = 0;
-            this.tbCommandLog.TextChanged += new System.EventHandler(this.tbCommandLog_TextChanged);
             // 
             // tbCommand
             // 
@@ -78,6 +78,7 @@
             this.btnStep.TabIndex = 3;
             this.btnStep.Text = "Step by step";
             this.btnStep.UseVisualStyleBackColor = true;
+            this.btnStep.Click += new System.EventHandler(this.btnStep_Click);
             // 
             // btnSequence
             // 
@@ -87,12 +88,25 @@
             this.btnSequence.TabIndex = 4;
             this.btnSequence.Text = "Execute Sequentially";
             this.btnSequence.UseVisualStyleBackColor = true;
+            this.btnSequence.Click += new System.EventHandler(this.btnSequence_Click);
+            // 
+            // btnNextStep
+            // 
+            this.btnNextStep.Enabled = false;
+            this.btnNextStep.Location = new System.Drawing.Point(866, 98);
+            this.btnNextStep.Name = "btnNextStep";
+            this.btnNextStep.Size = new System.Drawing.Size(86, 23);
+            this.btnNextStep.TabIndex = 5;
+            this.btnNextStep.Text = "Next Step";
+            this.btnNextStep.UseVisualStyleBackColor = true;
+            this.btnNextStep.Click += new System.EventHandler(this.btnNextStep_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(991, 450);
+            this.Controls.Add(this.btnNextStep);
             this.Controls.Add(this.btnSequence);
             this.Controls.Add(this.btnStep);
             this.Controls.Add(this.btnSendCommand);
@@ -115,6 +129,7 @@
         private System.Windows.Forms.Button btnSendCommand;
         private System.Windows.Forms.Button btnStep;
         private System.Windows.Forms.Button btnSequence;
+        private System.Windows.Forms.Button btnNextStep;
     }
 }
 

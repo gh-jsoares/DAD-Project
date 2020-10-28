@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Grpc.Net.Client;
 using ProcessCreationService;
 
@@ -9,6 +10,10 @@ namespace PuppetMaster
 
         private GrpcChannel channel;
         private CommandListener.CommandListenerClient pcs;
+
+        private Dictionary<string,string> clientMap = new Dictionary<string, string>();
+        private Dictionary<string, string> serverMap = new Dictionary<string, string>();
+
 
         public PuppetMasterLogic(ConfigReader cr)
         {
@@ -34,14 +39,34 @@ namespace PuppetMaster
 
         }
 
-        public bool SendCommand(string commandText)
+        public CommandReply SendCommand(string commandText)
         {
             CommandReply reply = pcs.ReceiveCommand(new CommandRequest
             {
                 Command = commandText
             });
 
-            return reply.Ok;
+            if (reply.Ok)
+                GatherInfo(reply);
+
+            return reply;
+        }
+
+        private void GatherInfo(CommandReply reply)
+        {
+            switch (reply.Type)
+            {
+                case "C":
+                    clientMap.Add(reply.Id, reply.Url);
+                    break;
+
+                case "S":
+                    serverMap.Add(reply.Id, reply.Url);
+                    break;
+
+                default:
+                    break;
+            }
         }
     }
 }

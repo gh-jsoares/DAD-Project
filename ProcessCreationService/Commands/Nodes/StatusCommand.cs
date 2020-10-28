@@ -15,9 +15,15 @@ namespace ProcessCreationService.Scripts.Commands
 
         public int NumArgs => 0;
 
-        void ICommand.SafeExecute(params string[] Args)
+        CommandReply ICommand.SafeExecute(params string[] Args)
         {
             Console.WriteLine(Args.Length);
+
+            return new CommandReply
+            {
+                Ok = true,
+                Error = $"{Name} Command sent successfully",
+            };
         }
     }
 }

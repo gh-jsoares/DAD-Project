@@ -13,11 +13,17 @@ namespace ProcessCreationService.Scripts.Commands
 
         public string Description => "Instructs the PuppetMaster to sleep for x_ms milliseconds before reading and executing the next command in the script file";
 
-        public int NumArgs => 3;
+        public int NumArgs => 1;
 
-        void ICommand.SafeExecute(params string[] Args)
+        CommandReply ICommand.SafeExecute(params string[] Args)
         {
             Console.WriteLine(Args.Length);
+
+            return new CommandReply
+            {
+                Ok = true,
+                Error = $"{Name} Command sent successfully",
+            };
         }
     }
 }

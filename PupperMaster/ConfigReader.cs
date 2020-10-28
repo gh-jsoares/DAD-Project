@@ -14,7 +14,6 @@ namespace PuppetMaster
 
             this.pcss = System.IO.File.ReadAllLines(@"..\..\..\files\config\" + file);
 
-            
         }
 
         public string[] Pcss { get => pcss; set => pcss = value; }

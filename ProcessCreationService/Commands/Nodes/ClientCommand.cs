@@ -17,17 +17,32 @@ namespace ProcessCreationService.Scripts.Commands
 
         public int NumArgs => 3;
 
-        void ICommand.SafeExecute(params string[] Args)
+        CommandReply ICommand.SafeExecute(params string[] Args)
         {
             Console.WriteLine(Args.Length);
 
+            //Create process with given arguments
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.FileName = @"..\..\..\..\Client\bin\Debug\netcoreapp3.1\Client.exe";
-            startInfo.Arguments = @$"{Args[0]} {Args[1]} {Args[2]}";
+            foreach (string arg in Args)
+            {
+                startInfo.Arguments += $"{arg} ";
+            }
             startInfo.UseShellExecute = true;
             startInfo.CreateNoWindow = false;
             startInfo.WindowStyle = ProcessWindowStyle.Normal;
             Process.Start(startInfo);
+
+            //Process reply
+            return new CommandReply
+            {
+                Ok = true,
+                Error = $"{Name} Command sent successfully",
+                Type = "C",
+                Id = Args[0],
+                Url = Args[1],
+            };
+            
         }
     }
 }

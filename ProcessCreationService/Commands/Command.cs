@@ -11,10 +11,10 @@ namespace ProcessCreationService.Commands
         string Description { get; }
         int NumArgs { get; }
 
-        public void Execute(params string[] Args)
+        public CommandReply Execute(params string[] Args)
         {
             ValidadeArgs(Args);
-            SafeExecute(Args);
+            return SafeExecute(Args);
         }
 
         protected void ValidadeArgs(string[] Args)
@@ -26,7 +26,7 @@ namespace ProcessCreationService.Commands
             }
         }
 
-        protected void SafeExecute(params string[] Args);
+        protected CommandReply SafeExecute(params string[] Args);
     }
 
     interface ICommand<T> : ICommand
