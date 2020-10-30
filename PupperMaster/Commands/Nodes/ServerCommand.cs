@@ -1,10 +1,10 @@
-﻿using ProcessCreationService.Commands;
+﻿using PuppetMaster.Commands;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
-namespace ProcessCreationService.Scripts.Commands
+namespace PuppetMaster.Scripts.Commands
 {
     class ServerCommand : ICommand
     {
@@ -16,7 +16,7 @@ namespace ProcessCreationService.Scripts.Commands
 
         public int NumArgs => 4;
 
-        CommandReply ICommand.SafeExecute(params string[] Args)
+        void ICommand.SafeExecute(string[] Args, PuppetMasterLogic PuppetMaster)
         {
             Console.WriteLine(Args.Length);
 
@@ -34,16 +34,8 @@ namespace ProcessCreationService.Scripts.Commands
             startInfo.WindowStyle = ProcessWindowStyle.Normal;
             Process.Start(startInfo);
 
-
-            //Process reply
-            return new CommandReply
-            {
-                Ok = true,
-                Error = $"{Name} Command sent successfully",
-                Type = "S",
-                Id = Args[0],
-                Url = Args[1],
-            };
+            //Add server to PuppetMaster Dictionary
+            PuppetMaster.ServerMap.Add(Args[0], Args[1]);
         }
     }
 }

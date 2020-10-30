@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ProcessCreationService.Commands
+namespace PuppetMaster.Commands
 {
     interface ICommand
     {
@@ -11,10 +11,11 @@ namespace ProcessCreationService.Commands
         string Description { get; }
         int NumArgs { get; }
 
-        public CommandReply Execute(params string[] Args)
+        public String Execute( string[] Args, PuppetMasterLogic PuppetMaster)
         {
             ValidadeArgs(Args);
-            return SafeExecute(Args);
+            SafeExecute(Args, PuppetMaster);
+            return $"{Name} Command sent successfully";
         }
 
         protected void ValidadeArgs(string[] Args)
@@ -26,17 +27,17 @@ namespace ProcessCreationService.Commands
             }
         }
 
-        protected CommandReply SafeExecute(params string[] Args);
+        protected void SafeExecute(string[] Args, PuppetMasterLogic PuppetMaster);
     }
 
-    interface ICommand<T> : ICommand
+    /*interface ICommand<T> : ICommand
     {
-        public new T Execute(params string[] Args)
+        public new T Execute(string[] Args)
         {
             ValidadeArgs(Args);
             return SafeExecute(Args);
         }
 
         protected new T SafeExecute(params string[] Args);
-    }
+    }*/
 }

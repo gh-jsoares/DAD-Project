@@ -2,71 +2,37 @@
 using System.Collections.Generic;
 using Grpc.Net.Client;
 using ProcessCreationService;
+using PuppetMaster.Commands;
 
 namespace PuppetMaster
 {
     class PuppetMasterLogic
     {
 
-        private GrpcChannel channel;
-        private CommandListener.CommandListenerClient pcs;
-
         private Dictionary<string,string> clientMap = new Dictionary<string, string>();
         private Dictionary<string, string> serverMap = new Dictionary<string, string>();
+        private Dictionary<string, string[]> partitionMap = new Dictionary<string, string[]>();
+        private int replicationFactor;
 
+        CommandExecutor commands;
 
-        public PuppetMasterLogic(ConfigReader cr)
+        public PuppetMasterLogic()
         {
 
-            cr.printPcss();
-
-            if(cr == null)
-            {
-                AppContext.SetSwitch(
-            "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-                channel = GrpcChannel.ForAddress("http://localhost:10000");
-                pcs = new CommandListener.CommandListenerClient(channel);
-            }
-            else                                                        //Apenas implementado para quando so ha 1 PCS
-            {
-                AppContext.SetSwitch(
-            "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-                channel = GrpcChannel.ForAddress(cr.Pcss[0]);
-                pcs = new CommandListener.CommandListenerClient(channel);
-            }
-
-            
+            commands = new CommandExecutor();
 
         }
 
-        public CommandReply SendCommand(string commandText)
+        public String SendCommand(string commandText)
         {
-            CommandReply reply = pcs.ReceiveCommand(new CommandRequest
-            {
-                Command = commandText
-            });
-
-            if (reply.Ok)
-                GatherInfo(reply);
-
-            return reply;
+            return commands.Run(commandText, this);
+        
         }
 
-        private void GatherInfo(CommandReply reply)
-        {
-            switch (reply.Type)
-            {
-                case "C":
-                    clientMap.Add(reply.Id, reply.Url);
-                    break;
 
-                case "S":
-                    serverMap.Add(reply.Id, reply.Url);
-                    break;
-
-                default:
-                    break;
-            }
-        }
+        public Dictionary<string, string> ClientMap { get => clientMap; set => clientMap = value; }
+        public Dictionary<string, string> ServerMap { get => serverMap; set => serverMap = value; }
+        public int ReplicationFactor { get => replicationFactor; set => replicationFactor = value; }
+        public Dictionary<string, string[]> PartitionMap { get => partitionMap; set => partitionMap = value; }
     }
 }

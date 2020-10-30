@@ -1,9 +1,10 @@
-﻿using ProcessCreationService.Commands;
+﻿using PuppetMaster.Commands;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ProcessCreationService.Scripts.Commands
+namespace PuppetMaster.Scripts.Commands
 {
     class PartitionCommand : ICommand
     {
@@ -13,17 +14,21 @@ namespace ProcessCreationService.Scripts.Commands
 
         public string Description => "Configures the system to store r replicas of partition partition_name on the servers identified with the server_ids server_id_1 to serverd_id_r";
 
-        public int NumArgs => 2;   //Pelo menos 2, podem ser mais
+        public int NumArgs => 3;   //Pelo menos 2, podem ser mais
 
-        CommandReply ICommand.SafeExecute(params string[] Args)
+        void ICommand.SafeExecute(string[] Args, PuppetMasterLogic PuppetMaster)
         {
             Console.WriteLine(Args.Length);
 
-            return new CommandReply
+            ArrayList arrayServer = new ArrayList();
+
+            for(int i = 2; i < Args.Length; i++)
             {
-                Ok = true,
-                Error = $"{Name} Command sent successfully",
-            };
+                arrayServer.Add(Args);
+            }
+
+            PuppetMaster.PartitionMap.Add(Args[1], (string[])arrayServer.ToArray());
+
         }
     }
 }

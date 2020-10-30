@@ -21,15 +21,15 @@ namespace PuppetMaster
         {
             AllocConsole();
 
-            ConfigReader cr = null;
+            /*ConfigReader cr = null;
 
             if (args.Length > 0)
-                cr = new ConfigReader(args[0]);
+                cr = new ConfigReader(args[0]);*/
 
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1(cr));
+            Application.Run(new Form1());
         }
     }
 }

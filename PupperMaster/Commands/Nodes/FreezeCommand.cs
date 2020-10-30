@@ -1,9 +1,9 @@
-﻿using ProcessCreationService.Commands;
+﻿using PuppetMaster.Commands;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ProcessCreationService.Scripts.Commands
+namespace PuppetMaster.Scripts.Commands
 {
     class FreezeCommand : ICommand
     {
@@ -15,15 +15,10 @@ namespace ProcessCreationService.Scripts.Commands
 
         public int NumArgs => 1;
 
-        CommandReply ICommand.SafeExecute(params string[] Args)
+        void ICommand.SafeExecute(string[] Args, PuppetMasterLogic PuppetMaster)
         {
             Console.WriteLine(Args.Length);
 
-            return new CommandReply
-            {
-                Ok = true,
-                Error = $"{Name} Command sent successfully",
-            };
         }
     }
 }

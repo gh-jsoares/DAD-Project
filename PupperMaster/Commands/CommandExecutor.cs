@@ -1,4 +1,4 @@
-﻿using ProcessCreationService.Scripts.Commands;
+﻿using PuppetMaster.Scripts.Commands;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace ProcessCreationService.Commands
+namespace PuppetMaster.Commands
 {
     class CommandExecutor
     {
@@ -26,18 +26,14 @@ namespace ProcessCreationService.Commands
             commands.Add(new WaitCommand());
         }
 
-        public CommandReply Run(string Input)
+        public String Run(string Input, PuppetMasterLogic puppetMaster)
         {
             string[] SplitInput = Regex.Replace(Input.Trim(), @"\s+", " ").Split(" ");
-
-            CommandReply cr = new CommandReply { };
 
             if (SplitInput.Length == 0)
             {
                 Console.Error.WriteLine("No command specified");
-                cr.Ok = false;
-                cr.Error = "No command specified";
-                return cr;
+                return "No command specified";
             }
 
             string Name = SplitInput[0];
@@ -48,26 +44,20 @@ namespace ProcessCreationService.Commands
             if (Command == null)
             {
                 Console.Error.WriteLine("No command found for {0}", Name);
-                cr.Ok = false;
-                cr.Error = $"No command found for {Name}";
-                return cr;
+                return  $"No command found for {Name}";
             }
 
             try
             {
-                cr = Command.Execute(ArgsList.ToArray());
+                return Command.Execute(ArgsList.ToArray(), puppetMaster);
 
             }
             catch (Exception e)
             {
                 Console.Error.WriteLine(e.Message);
 
-                cr.Ok = false;
-                cr.Error = e.Message;
-                return cr;
+                return e.Message;
             }
-
-            return cr;
         }
     }
 }

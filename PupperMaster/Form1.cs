@@ -19,18 +19,16 @@ namespace PuppetMaster
 
         Queue commandsList = new Queue();
 
-        public Form1(ConfigReader cr)
+        public Form1()
         {
             InitializeComponent();
 
-            pml = new PuppetMasterLogic(cr);
+            pml = new PuppetMasterLogic();
         }
 
         private void btnSendCommand_Click(object sender, EventArgs e)
         {
-            CommandReply cr = pml.SendCommand(tbCommand.Text);
-
-            tbCommandLog.Text += cr.Error + "\r\n";
+            tbCommandLog.Text += pml.SendCommand(tbCommand.Text) + "\r\n";
 
         }
 
@@ -40,9 +38,7 @@ namespace PuppetMaster
 
             foreach(string c in commands)
             {
-                CommandReply cr = pml.SendCommand(c);
-
-                tbCommandLog.Text += cr.Error + "\r\n";
+                tbCommandLog.Text += pml.SendCommand(c) + "\r\n";
             }
         }
 
@@ -53,6 +49,8 @@ namespace PuppetMaster
             commandsList = new Queue(commands);
 
             btnNextStep.Enabled = true;
+            btnSequence.Enabled = false;
+            btnStep.Enabled = false;
         }
 
         private void btnNextStep_Click(object sender, EventArgs e)
@@ -60,12 +58,15 @@ namespace PuppetMaster
 
             string command = (string) commandsList.Dequeue();
 
-            CommandReply cr = pml.SendCommand(command);
-
-            tbCommandLog.Text += cr.Error + "\r\n";
+            tbCommandLog.Text += pml.SendCommand(command) + "\r\n";
 
             if(commandsList.Count == 0)
+            {
                 btnNextStep.Enabled = false;
+                btnSequence.Enabled = true;
+                btnStep.Enabled = true;
+            }
+                
 
         }
     }
