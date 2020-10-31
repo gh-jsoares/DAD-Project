@@ -12,13 +12,29 @@ namespace Client.Commands
     {
         private HashSet<ICommand> commands;
 
-        public CommandExecutor()
+        public CommandExecutor(bool PuppetMasterCommands)
         {
             this.commands = new HashSet<ICommand>();
-            commands.Add(new WaitCommand());
+
+            //Commands sent by the Puppet Master to the client
+            if(PuppetMasterCommands)
+            {
+                commands.Add(new PartitionCommand());
+                commands.Add(new ServerCommand());
+                commands.Add(new StatusCommand());
+            }
+
+            //Commands run by the client's script (write, read, list_server, etc.)
+            else    
+            {
+                commands.Add(new WaitCommand());
+            }
+
+           
+            
         }
 
-        public void Run(string Input)
+        public void Run(string Input, ClientLogic client)
         {
             string[] SplitInput = Regex.Replace(Input.Trim(), @"\s+", " ").Split(" ");
 
@@ -41,7 +57,7 @@ namespace Client.Commands
 
             try
             {
-                Command.Execute(ArgsList.ToArray());
+                Command.Execute(ArgsList.ToArray(), client);
             }
             catch (Exception e)
             {

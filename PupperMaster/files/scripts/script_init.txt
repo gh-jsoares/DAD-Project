@@ -1,0 +1,12 @@
+Client c_1 http://localhost:1001 -
+Client c_2 http://localhost:1002 -
+Server s_1 http://localhost:2001 0 0
+Server s_2 http://localhost:2002 0 0
+Server s_3 http://localhost:2003 0 0
+Server s_4 http://localhost:2004 0 0
+Server s_5 http://localhost:2005 0 0
+Server s_6 http://localhost:2006 0 0
+ReplicationFactor 2
+Partition 2 p_1 s_1 s_2
+Partition 2 p_2 s_3 s_4
+Partition 2 p_3 s_5 s_6

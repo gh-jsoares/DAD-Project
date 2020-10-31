@@ -20,7 +20,7 @@ namespace PuppetMaster.Commands
 
         protected void ValidadeArgs(string[] Args)
         {
-            if (Args.Length != NumArgs)
+            if (Args.Length < NumArgs)
             {
                 // throw custom exception
                 throw new Exception(string.Format("Missing arguments. Syntax: {0} {1}", Name, Syntax));

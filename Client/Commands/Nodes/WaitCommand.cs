@@ -15,9 +15,9 @@ namespace Client.Scripts.Commands
 
         public int NumArgs => 1;
 
-        void ICommand.SafeExecute(params string[] Args)
+        void ICommand.SafeExecute(string[] Args, ClientLogic client)
         {
-            Console.WriteLine(Args.Length);
+            throw new NotImplementedException();
         }
     }
 }

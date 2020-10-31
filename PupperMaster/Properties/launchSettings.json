@@ -2,7 +2,7 @@
   "profiles": {
     "PuppetMaster": {
       "commandName": "Project",
-      "commandLineArgs": "config_1.txt"
+      "commandLineArgs": "script_init.txt"
     }
   }
 }

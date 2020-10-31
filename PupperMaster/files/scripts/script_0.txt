@@ -1,4 +1,4 @@
-Client 1 2 3
-Server 1 2 3 4
-Wait 2
-Client 2 2 3
+Status
+Client c_3 http://localhost:1003 -
+Status
+Server s_7 http://localhost:2003 0 0

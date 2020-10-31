@@ -1,4 +1,5 @@
-﻿using PuppetMaster.Commands;
+﻿using Grpc.Net.Client;
+using PuppetMaster.Commands;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -19,6 +20,19 @@ namespace PuppetMaster.Scripts.Commands
         {
             Console.WriteLine(Args.Length);
 
+            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+
+            foreach (KeyValuePair<string, string> entry in PuppetMaster.ClientMap)
+            {
+                
+                GrpcChannel channel = GrpcChannel.ForAddress(entry.Value);
+                CommandListener.CommandListenerClient client = new CommandListener.CommandListenerClient(channel);
+
+                CommandReply reply = client.SendCommand(new CommandRequest
+                {
+                    Text = $"{Name}"
+                });
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using PuppetMaster.Commands;
+﻿using Grpc.Net.Client;
+using PuppetMaster.Commands;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -24,10 +25,27 @@ namespace PuppetMaster.Scripts.Commands
 
             for(int i = 2; i < Args.Length; i++)
             {
-                arrayServer.Add(Args);
+                arrayServer.Add(Args[i]);
+
             }
 
-            PuppetMaster.PartitionMap.Add(Args[1], (string[])arrayServer.ToArray());
+            PuppetMaster.PartitionMap.Add(Args[1], (string[])arrayServer.ToArray(typeof(string)));
+
+
+            //Send Partitions to every client
+            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+
+            foreach (KeyValuePair<string, string> entry in PuppetMaster.ClientMap)
+            {
+
+                GrpcChannel channel = GrpcChannel.ForAddress(entry.Value);
+                CommandListener.CommandListenerClient client = new CommandListener.CommandListenerClient(channel);
+
+                CommandReply reply = client.SendCommand(new CommandRequest
+                {
+                    Text = $"{Name} {string.Join(" ", Args)}"
+                });
+            }
 
         }
     }

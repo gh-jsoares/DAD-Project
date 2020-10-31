@@ -8,7 +8,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using ProcessCreationService;
 
 namespace PuppetMaster
 {
@@ -19,11 +18,19 @@ namespace PuppetMaster
 
         Queue commandsList = new Queue();
 
-        public Form1()
+        public Form1(ConfigReader cr)
         {
             InitializeComponent();
 
             pml = new PuppetMasterLogic();
+
+            if(cr != null)
+            {
+                foreach (string c in cr.InitialSetup)
+                {
+                    tbCommandLog.Text += pml.SendCommand(c) + "\r\n";
+                }
+            }
         }
 
         private void btnSendCommand_Click(object sender, EventArgs e)

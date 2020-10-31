@@ -14,9 +14,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <Protobuf Include="..\ProcessCreationService\Protos\commandListener.proto" GrpcServices="Client">
-      <Link>Protos\commandListener.proto</Link>
-    </Protobuf>
+    <Protobuf Include="Protos\commandListener.proto" GrpcServices="Client" />
   </ItemGroup>
 
 </Project>

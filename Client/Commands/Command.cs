@@ -11,32 +11,32 @@ namespace Client.Commands
         string Description { get; }
         int NumArgs { get; }
 
-        public void Execute(params string[] Args)
+        public void Execute(string[] Args, ClientLogic client)
         {
             ValidadeArgs(Args);
-            SafeExecute(Args);
+            SafeExecute(Args, client);
         }
 
         protected void ValidadeArgs(string[] Args)
         {
-            if (Args.Length != NumArgs)
+            if (Args.Length < NumArgs)
             {
                 // throw custom exception
                 throw new Exception(string.Format("Missing arguments. Syntax: {0} {1}", Name, Syntax));
             }
         }
 
-        protected void SafeExecute(params string[] Args);
+        protected void SafeExecute(string[] Args, ClientLogic client);
     }
 
-    interface ICommand<T> : ICommand
+   /* interface ICommand<T> : ICommand
     {
-        public new T Execute(params string[] Args)
+        public new T Execute(string[] Args, ClientLogic client))
         {
             ValidadeArgs(Args);
             return SafeExecute(Args);
         }
 
-        protected new T SafeExecute(params string[] Args);
-    }
+        protected new T SafeExecute(string[] Args, ClientLogic client));
+    }*
 }
