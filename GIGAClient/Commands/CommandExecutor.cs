@@ -29,9 +29,6 @@ namespace GIGAClient.Commands
             {
                 commands.Add(new WaitCommand());
             }
-
-           
-            
         }
 
         public void Run(string Input, ClientLogic client)
