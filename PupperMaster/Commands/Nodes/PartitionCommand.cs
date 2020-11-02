@@ -33,7 +33,7 @@ namespace PuppetMaster.Scripts.Commands
 
 
             //Send Partitions to every client
-            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            /*AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
             foreach (KeyValuePair<string, string> entry in PuppetMaster.ClientMap)
             {
@@ -45,7 +45,7 @@ namespace PuppetMaster.Scripts.Commands
                 {
                     Text = $"{Name} {string.Join(" ", Args)}"
                 });
-            }
+            }*/
 
         }
     }

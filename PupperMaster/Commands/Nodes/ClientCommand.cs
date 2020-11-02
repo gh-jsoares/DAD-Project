@@ -23,7 +23,7 @@ namespace PuppetMaster.Scripts.Commands
 
             //Create process with given arguments
             ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.FileName = @"..\..\..\..\Client\bin\Debug\netcoreapp3.1\Client.exe";
+            startInfo.FileName = @"..\..\..\..\GIGAClient\bin\Debug\netcoreapp3.1\GIGAClient.exe";
             foreach (string arg in Args)
             {
                 startInfo.Arguments += $"{arg} ";

@@ -23,7 +23,7 @@ namespace PuppetMaster.Scripts.Commands
 
             //Start new server process
             ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.FileName = @"..\..\..\..\Server\bin\Debug\netcoreapp3.1\Server.exe";
+            startInfo.FileName = @"..\..\..\..\GIGAServer\bin\Debug\netcoreapp3.1\GIGAServer.exe";
 
             foreach (string arg in Args)
             {
@@ -39,7 +39,7 @@ namespace PuppetMaster.Scripts.Commands
             PuppetMaster.ServerMap.Add(Args[0], Args[1]);
 
             //Send URL to every client
-            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            /*AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
             foreach (KeyValuePair<string, string> entry in PuppetMaster.ClientMap)
             {
@@ -51,7 +51,7 @@ namespace PuppetMaster.Scripts.Commands
                 {
                     Text = $"{Name} {string.Join(" ", Args)}"
                 });
-            }
+            }*/
         }
     }
 }

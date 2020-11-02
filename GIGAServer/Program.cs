@@ -8,8 +8,21 @@ namespace GIGAServer
     {
         static void Main(string[] args)
         {
-            const int port = 1001;
-            const string hostname = "localhost";
+            int port;
+            string hostname;
+
+            if(args.Length != 4)
+            {
+                port = 1001;
+                hostname = "localhost";
+            }
+            else
+            {
+                Uri uri = new Uri(args[1]);
+
+                port = uri.Port;
+                hostname = uri.Host;
+            }
             string startupMessage;
             ServerPort serverPort;
 
