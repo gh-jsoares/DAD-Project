@@ -11,6 +11,8 @@ namespace GIGAClient.Commands
     class CommandExecutor
     {
         private HashSet<ICommand> commands;
+        public static int LoopCount = 0;
+        public static Dictionary<ICommand, string[]> LoopCommands;
 
         public CommandExecutor(bool PuppetMasterCommands)
         {
@@ -54,7 +56,10 @@ namespace GIGAClient.Commands
 
             try
             {
-                Command.Execute(ArgsList.ToArray(), client);
+                if (LoopCount == 0 || Command is EndRepeatCommand)
+                    Command.Execute(ArgsList.ToArray(), client);
+                else
+                    LoopCommands.Add(Command, ArgsList.ToArray());
             }
             catch (Exception e)
             {

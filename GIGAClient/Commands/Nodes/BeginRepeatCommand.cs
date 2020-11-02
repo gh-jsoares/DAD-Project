@@ -17,7 +17,9 @@ namespace GIGAClient.Scripts.Commands
 
         void ICommand.SafeExecute(string[] Args, ClientLogic client)
         {
-            throw new NotImplementedException();
+            string v = Args[0];
+            // TODO: validate argument as integer
+            CommandExecutor.LoopCount = int.Parse(v);
         }
     }
 }

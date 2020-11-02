@@ -17,7 +17,15 @@ namespace GIGAClient.Scripts.Commands
 
         void ICommand.SafeExecute(string[] Args, ClientLogic client)
         {
-            throw new NotImplementedException();
+            while (CommandExecutor.LoopCount > 0)
+            {
+                foreach (KeyValuePair<ICommand, string[]> entry in CommandExecutor.LoopCommands)
+                    entry.Key.Execute(entry.Value, client);
+
+                CommandExecutor.LoopCount--;
+            }
+
+            CommandExecutor.LoopCommands.Clear();
         }
     }
 }
