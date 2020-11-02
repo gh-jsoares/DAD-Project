@@ -26,11 +26,11 @@ namespace PuppetMaster.Scripts.Commands
             {
                 
                 GrpcChannel channel = GrpcChannel.ForAddress(entry.Value);
-                CommandListener.CommandListenerClient client = new CommandListener.CommandListenerClient(channel);
+                GIGAPuppetMasterProtoService.GIGAPuppetMasterProtoServiceClient client = new GIGAPuppetMasterProtoService.GIGAPuppetMasterProtoServiceClient(channel);
 
-                CommandReply reply = client.SendCommand(new CommandRequest
+                StatusReply reply = client.StatusService(new StatusRequest
                 {
-                    Text = $"{Name}"
+
                 });
             }
         }

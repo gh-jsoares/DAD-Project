@@ -12,14 +12,9 @@ namespace PuppetMaster
         /// <summary>
         ///  The main entry point for the application.
         /// </summary>
-        [STAThread]
 
-        [DllImport("kernel32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool AllocConsole();
         static void Main(string[] args)
         {
-            AllocConsole();
 
             ConfigReader cr = null;
 

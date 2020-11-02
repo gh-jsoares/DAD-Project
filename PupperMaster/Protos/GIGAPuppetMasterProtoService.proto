@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+option csharp_namespace = "PuppetMaster";
+
+service GIGAPuppetMasterProtoService {
+  rpc StatusService (StatusRequest) returns (StatusReply);
+  rpc ServerService (ServerRequest) returns (ServerReply); 
+  rpc PartitionService (PartitionRequest) returns (PartitionReply); 
+}
+message StatusRequest {
+
+}
+message StatusReply {
+	bool ok = 1;
+}
+
+message ServerRequest {
+  string id = 1;
+  string url = 2;
+}
+message ServerReply {
+	bool ok = 1;
+}
+
+message PartitionRequest {
+  string id = 1;
+  string servers = 2;
+}
+message PartitionReply {
+	bool ok = 1;
+}

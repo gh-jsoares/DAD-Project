@@ -12,9 +12,11 @@
     <PackageReference Include="Grpc.Tools" Version="2.33.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    </PackageReference>  
+  </ItemGroup>
 
-    <Protobuf Include="protos\GIGAPuppetMasterService.proto" GrpcServices="Server" />
+  <ItemGroup>
+    <Protobuf Include="../PupperMaster/protos\GIGAPuppetMasterProtoService.proto" Link="protos\GIGAPuppetMasterProtoService.proto" GrpcServices="Server" />
   </ItemGroup>
 
 </Project>

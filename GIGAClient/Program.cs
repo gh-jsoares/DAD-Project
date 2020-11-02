@@ -10,7 +10,7 @@ namespace GIGAClient
 
         static async Task Main(string[] args)
         {
-            commands = new CommandExecutor(false);
+            commands = new CommandExecutor();
 
             Console.WriteLine($"{args.Length}");
             

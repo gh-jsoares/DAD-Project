@@ -1,4 +1,5 @@
-﻿using PuppetMaster.Commands;
+﻿using Grpc.Net.Client;
+using PuppetMaster.Commands;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -36,6 +37,31 @@ namespace PuppetMaster.Scripts.Commands
 
             //Add client to PuppetMaster Dictionary
             PuppetMaster.ClientMap.Add(Args[0], Args[1]);
+
+
+            //Send Partitions to client
+            GrpcChannel channel = GrpcChannel.ForAddress(Args[1]);
+            GIGAPuppetMasterProtoService.GIGAPuppetMasterProtoServiceClient client = new GIGAPuppetMasterProtoService.GIGAPuppetMasterProtoServiceClient(channel);
+
+            foreach (KeyValuePair < string, string[]> entry in PuppetMaster.PartitionMap)
+            {
+                PartitionReply reply = client.PartitionService(new PartitionRequest
+                {
+                    Id = entry.Key,
+                    Servers = string.Join(" ", entry.Value)  
+                });
+            }
+
+            //Send servers to client
+            foreach (KeyValuePair<string, string> entry in PuppetMaster.ServerMap)
+            {
+                ServerReply reply = client.ServerService(new ServerRequest
+                {
+                    Id = entry.Key,
+                    Url = entry.Value
+                });
+            }
+
         }
     }
 }

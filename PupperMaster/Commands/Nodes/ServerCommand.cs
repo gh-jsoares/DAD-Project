@@ -39,19 +39,22 @@ namespace PuppetMaster.Scripts.Commands
             PuppetMaster.ServerMap.Add(Args[0], Args[1]);
 
             //Send URL to every client
-            /*AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+
+            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
             foreach (KeyValuePair<string, string> entry in PuppetMaster.ClientMap)
             {
 
                 GrpcChannel channel = GrpcChannel.ForAddress(entry.Value);
-                CommandListener.CommandListenerClient client = new CommandListener.CommandListenerClient(channel);
+                GIGAPuppetMasterProtoService.GIGAPuppetMasterProtoServiceClient client = new GIGAPuppetMasterProtoService.GIGAPuppetMasterProtoServiceClient(channel);
 
-                CommandReply reply = client.SendCommand(new CommandRequest
+                ServerReply reply = client.ServerService(new ServerRequest
                 {
-                    Text = $"{Name} {string.Join(" ", Args)}"
+                    Id = Args[0],
+                    Url = Args[1]
                 });
-            }*/
+
+            }
         }
     }
 }

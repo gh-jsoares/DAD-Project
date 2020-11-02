@@ -18,7 +18,7 @@ namespace GIGAClient
         private Dictionary<string, string> serverMap = new Dictionary<string, string>();
         private Dictionary<string, string[]> partitionMap = new Dictionary<string, string[]>();
 
-        private CommandExecutor commandExecutor = new CommandExecutor(false);
+        private CommandExecutor commandExecutor = new CommandExecutor();
 
         
 
@@ -34,9 +34,9 @@ namespace GIGAClient
 
             Uri uri = new Uri(url);
 
-            Grpc.Core.Server server = new Grpc.Core.Server                              //Change Server project namespace
+            Server server = new Server                              
             {
-                Services = { GIGAPupperMasterProtoService.BindService(new GIGAPuppetMasterService(this)) },
+                Services = { GIGAPuppetMasterProtoService.BindService(new GIGAPuppetMasterService(this)) },
                 Ports = { new ServerPort(uri.Host, uri.Port, ServerCredentials.Insecure) }
             };
 

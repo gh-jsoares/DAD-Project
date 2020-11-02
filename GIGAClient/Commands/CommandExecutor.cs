@@ -14,23 +14,12 @@ namespace GIGAClient.Commands
         public static int LoopCount = 0;
         public static Dictionary<ICommand, string[]> LoopCommands;
 
-        public CommandExecutor(bool PuppetMasterCommands)
+        public CommandExecutor()
         {
             this.commands = new HashSet<ICommand>();
 
-            //Commands sent by the Puppet Master to the client
-            if(PuppetMasterCommands)
-            {
-                commands.Add(new PartitionCommand());
-                commands.Add(new ServerCommand());
-                commands.Add(new StatusCommand());
-            }
-
-            //Commands run by the client's script (write, read, list_server, etc.)
-            else    
-            {
-                commands.Add(new WaitCommand());
-            }
+            commands.Add(new WaitCommand());
+            
         }
 
         public void Run(string Input, ClientLogic client)

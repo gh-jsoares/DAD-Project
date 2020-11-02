@@ -8,9 +8,8 @@ using System.Threading.Tasks;
 
 namespace GIGAClient.services
 {
-    class GIGAPuppetMasterService : GIGAPupperMasterProtoService.GIGAPupperMasterProtoServiceBase
+    class GIGAPuppetMasterService : GIGAPuppetMasterProtoService.GIGAPuppetMasterProtoServiceBase
     {
-        private CommandExecutor commandExecutor = new CommandExecutor(true);
         private ClientLogic clientLogic;
 
         public GIGAPuppetMasterService(ClientLogic clientLogic)
@@ -18,18 +17,59 @@ namespace GIGAClient.services
             this.clientLogic = clientLogic;
         }
 
-        public override Task<CommandReply> SendCommand(CommandRequest request, ServerCallContext context)
+        public override Task<StatusReply> StatusService(StatusRequest request, ServerCallContext context)
         {
-            return Task.FromResult(HandleCommand(request));
+            return Task.FromResult(HandleStatusService(request));
         }
 
-        public CommandReply HandleCommand(CommandRequest request)
+        public StatusReply HandleStatusService(StatusRequest request)
         {
-            Console.WriteLine($"New command received from Puppet Master : {request.Text}");
 
-            commandExecutor.Run(request.Text, clientLogic);
+            Console.WriteLine($"Client {clientLogic.Username} is up in URL {clientLogic.Url}");
 
-            return new CommandReply
+            return new StatusReply
+            {
+                Ok = true
+            };
+        }
+
+
+        public override Task<PartitionReply> PartitionService(PartitionRequest request, ServerCallContext context)
+        {
+            return Task.FromResult(HandlePartitionService(request));
+        }
+
+        public PartitionReply HandlePartitionService(PartitionRequest request)
+        {
+
+            string[] arrayServer = request.Servers.Split(" ");
+
+            clientLogic.PartitionMap.Add(request.Id, arrayServer);
+
+            Console.WriteLine($"Added new Partition {request.Id} with {arrayServer.Length} servers: {request.Servers}");
+
+
+            return new PartitionReply
+            {
+                Ok = true
+            };
+        }
+
+
+        public override Task<ServerReply> ServerService(ServerRequest request, ServerCallContext context)
+        {
+            return Task.FromResult(HandleServerService(request));
+        }
+
+        public ServerReply HandleServerService(ServerRequest request)
+        {
+
+            clientLogic.ServerMap.Add(request.Id, request.Url);
+
+            Console.WriteLine($"Added new server {request.Id} with URL {request.Url}");
+
+
+            return new ServerReply
             {
                 Ok = true
             };
