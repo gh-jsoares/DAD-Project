@@ -1,0 +1,15 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "PuppetMaster";
+
+service GIGAPupperMasterProtoService {
+  rpc  SendCommand (CommandRequest) returns (CommandReply);
+}
+
+message CommandRequest {
+  string text = 1;
+}
+
+message CommandReply {
+	bool ok = 1;
+}

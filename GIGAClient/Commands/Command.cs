@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace PuppetMaster.Commands
+namespace GIGAClient.Commands
 {
     interface ICommand
     {
@@ -11,11 +11,10 @@ namespace PuppetMaster.Commands
         string Description { get; }
         int NumArgs { get; }
 
-        public string Execute( string[] Args, PuppetMasterLogic PuppetMaster)
+        public void Execute(string[] Args, ClientLogic client)
         {
             ValidadeArgs(Args);
-            SafeExecute(Args, PuppetMaster);
-            return $"{Name} Command sent successfully";
+            SafeExecute(Args, client);
         }
 
         protected void ValidadeArgs(string[] Args)
@@ -27,17 +26,17 @@ namespace PuppetMaster.Commands
             }
         }
 
-        protected void SafeExecute(string[] Args, PuppetMasterLogic PuppetMaster);
+        protected void SafeExecute(string[] Args, ClientLogic client);
     }
 
-    /*interface ICommand<T> : ICommand
+   /* interface ICommand<T> : ICommand
     {
-        public new T Execute(string[] Args)
+        public new T Execute(string[] Args, ClientLogic client))
         {
             ValidadeArgs(Args);
             return SafeExecute(Args);
         }
 
-        protected new T SafeExecute(params string[] Args);
+        protected new T SafeExecute(string[] Args, ClientLogic client));
     }*/
 }

@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="3.9.1" />
+    <PackageReference Include="Grpc.AspNetCore.Server" Version="2.23.2" />
     <PackageReference Include="Grpc.Core" Version="2.33.1" />
     <PackageReference Include="Grpc.Net.ClientFactory" Version="2.23.2" />
     <PackageReference Include="Grpc.Tools" Version="2.23.0">
@@ -16,13 +17,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="..\Server\Protos\customers.proto" GrpcServices="Client">
-      <Link>Protos\customers.proto</Link>
+    <Protobuf Include="..\GIGAServer\protos\GIGAServer.proto" GrpcServices="Client">
+      <Link>Protos\GIGAServer.proto</Link>
     </Protobuf>
-    <Protobuf Include="..\Server\Protos\greet.proto" GrpcServices="Client">
-      <Link>Protos\greet.proto</Link>
-    </Protobuf>
-    <Protobuf Include="..\PupperMaster\Protos\commandListener.proto" GrpcServices="Server">
+    <Protobuf Include="..\PupperMaster\protos\commandListener.proto">
       <Link>Protos\commandListener.proto</Link>
     </Protobuf>
   </ItemGroup>

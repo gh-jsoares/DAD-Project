@@ -1,4 +1,4 @@
-﻿using PuppetMaster.Scripts.Commands;
+﻿using GIGAClient.Scripts.Commands;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -6,34 +6,42 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace PuppetMaster.Commands
+namespace GIGAClient.Commands
 {
     class CommandExecutor
     {
         private HashSet<ICommand> commands;
 
-        public CommandExecutor()
+        public CommandExecutor(bool PuppetMasterCommands)
         {
             this.commands = new HashSet<ICommand>();
-            commands.Add(new ClientCommand());
-            commands.Add(new CrashCommand());
-            commands.Add(new FreezeCommand());
-            commands.Add(new PartitionCommand());
-            commands.Add(new ReplicationFactorCommand());
-            commands.Add(new ServerCommand());
-            commands.Add(new StatusCommand());
-            commands.Add(new UnfreezeCommand());
-            commands.Add(new WaitCommand());
+
+            //Commands sent by the Puppet Master to the client
+            if(PuppetMasterCommands)
+            {
+                commands.Add(new PartitionCommand());
+                commands.Add(new ServerCommand());
+                commands.Add(new StatusCommand());
+            }
+
+            //Commands run by the client's script (write, read, list_server, etc.)
+            else    
+            {
+                commands.Add(new WaitCommand());
+            }
+
+           
+            
         }
 
-        public string Run(string Input, PuppetMasterLogic puppetMaster)
+        public void Run(string Input, ClientLogic client)
         {
             string[] SplitInput = Regex.Replace(Input.Trim(), @"\s+", " ").Split(" ");
 
             if (SplitInput.Length == 0)
             {
                 Console.Error.WriteLine("No command specified");
-                return "No command specified";
+                return;
             }
 
             string Name = SplitInput[0];
@@ -44,19 +52,16 @@ namespace PuppetMaster.Commands
             if (Command == null)
             {
                 Console.Error.WriteLine("No command found for {0}", Name);
-                return  $"No command found for {Name}";
+                return;
             }
 
             try
             {
-                return Command.Execute(ArgsList.ToArray(), puppetMaster);
-
+                Command.Execute(ArgsList.ToArray(), client);
             }
             catch (Exception e)
             {
                 Console.Error.WriteLine(e.Message);
-
-                return e.Message;
             }
         }
     }

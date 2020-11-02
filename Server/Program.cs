@@ -13,6 +13,17 @@ namespace Server
         public static void Main(string[] args)
         {
             CreateHostBuilder(args).Build().Run();
+
+            Uri uri = new Uri(url);
+
+            Grpc.Core.Server server = new Grpc.Core.Server                              //Change Server project namespace
+            {
+                Services = { CommandListener.BindService(new ClientService(this)) },
+                Ports = { new ServerPort(uri.Host, uri.Port, ServerCredentials.Insecure) }
+            };
+
+            server.Start();
+            Console.WriteLine($"Client server listening on host {uri.Host} and port {uri.Port} ");
         }
 
         // Additional configuration is required to successfully run gRPC on macOS.

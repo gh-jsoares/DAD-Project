@@ -1,0 +1,14 @@
+﻿syntax = "proto3";
+
+service GIGAServerProtoService {
+	rpc Test (TestRequest) returns (TestReply);
+}
+
+message TestRequest {
+	string id = 1;
+}
+
+message TestReply {
+	string id = 1;
+}
+
