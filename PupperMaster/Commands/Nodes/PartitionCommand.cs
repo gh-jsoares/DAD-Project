@@ -29,25 +29,25 @@ namespace PuppetMaster.Scripts.Commands
 
             }
 
-            PuppetMaster.PartitionMap.Add(Args[1], (string[])arrayServer.ToArray(typeof(string)));
+            //PuppetMaster.PartitionMap.Add(Args[1], (string[])arrayServer.ToArray(typeof(string)));
 
 
-            //Send Partitions to every client
-            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            ////Send Partitions to every client
+            //AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
-            foreach (KeyValuePair<string, string> entry in PuppetMaster.ClientMap)
-            {
+            //foreach (KeyValuePair<string, string> entry in PuppetMaster.ClientMap)
+            //{
 
-                GrpcChannel channel = GrpcChannel.ForAddress(entry.Value);
-                GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient client = new GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient(channel);
+            //    GrpcChannel channel = GrpcChannel.ForAddress(entry.Value);
+            //    GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient client = new GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient(channel);
 
-                GIGAPuppetMasterProto.PartitionReply reply = client.PartitionService(new GIGAPuppetMasterProto.PartitionRequest
-                {
-                    Id = Args[1],
-                    Servers =   string.Join(" ", (string[])arrayServer.ToArray(typeof(string))) 
-                });
+            //    GIGAPuppetMasterProto.PartitionReply reply = client.PartitionService(new GIGAPuppetMasterProto.PartitionRequest
+            //    {
+            //        Id = Args[1],
+            //        Servers =   string.Join(" ", (string[])arrayServer.ToArray(typeof(string))) 
+            //    });
 
-            }
+            //}
 
         }
     }

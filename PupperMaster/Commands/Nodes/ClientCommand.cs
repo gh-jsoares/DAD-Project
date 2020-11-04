@@ -41,14 +41,14 @@ namespace PuppetMaster.Scripts.Commands
             GrpcChannel channel = GrpcChannel.ForAddress(Args[1]);
             GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient client = new GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient(channel);
 
-            foreach (KeyValuePair < string, string[]> entry in PuppetMaster.PartitionMap)
-            {
-                GIGAPuppetMasterProto.PartitionReply reply = client.PartitionService(new GIGAPuppetMasterProto.PartitionRequest
-                {
-                    Id = entry.Key,
-                    Servers = string.Join(" ", entry.Value)  
-                });
-            }
+            //foreach (KeyValuePair < string, string[]> entry in PuppetMaster.PartitionMap)
+            //{
+            //    //GIGAPuppetMasterProto.PartitionReply reply = client.PartitionService(new GIGAPuppetMasterProto.PartitionRequest
+            //    //{
+            //    //    Id = entry.Key,
+            //    //    Servers = string.Join(" ", entry.Value)  
+            //    //});
+            //}
 
         }
     }

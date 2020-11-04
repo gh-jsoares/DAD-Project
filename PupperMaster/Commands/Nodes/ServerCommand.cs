@@ -1,8 +1,10 @@
-﻿using Grpc.Net.Client;
+﻿using GIGAPuppetMaster.domain;
+using Grpc.Net.Client;
 using PuppetMaster.Commands;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 
 namespace PuppetMaster.Scripts.Commands
@@ -36,24 +38,25 @@ namespace PuppetMaster.Scripts.Commands
             Process.Start(startInfo);
 
             //Add server to PuppetMaster Dictionary
-            PuppetMaster.ServerMap.Add(Args[0], Args[1]);
-
-            //Send URL to every client
+            GIGAServerObject serverObject = new GIGAServerObject(Args[0], Args[1]);
+            PuppetMaster.ServerMap.Add(serverObject.Name, serverObject);
 
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
-            foreach (KeyValuePair<string, string> entry in PuppetMaster.ClientMap)
+            foreach (KeyValuePair<string, GIGAPartitionObject> entry in PuppetMaster.PartitionMap)
             {
-
-                GrpcChannel channel = GrpcChannel.ForAddress(entry.Value);
+                GrpcChannel channel = GrpcChannel.ForAddress(string.Format("http://{0}:{1}", Args[0], Args[1]));
                 GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient client = new GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient(channel);
+                GIGAServerObject[] servers = entry.Value.Servers.Values.ToArray();
 
-                GIGAPuppetMasterProto.ServerReply reply = client.ServerService(new GIGAPuppetMasterProto.ServerRequest
+                GIGAPuppetMasterProto.PartitionRequest request = new GIGAPuppetMasterProto.PartitionRequest
                 {
-                    Id = Args[0],
-                    Url = Args[1]
-                });
+                    PartitionId = entry.Value.Name,
+                    ReplicationFactor = entry.Value.ReplicationFactor,
+                };
+                request.Servers.AddRange(servers.Select(server => new GIGAPuppetMasterProto.ServerObject { Id = server.Name, Url = server.Url }));
 
+                client.PartitionService(request);
             }
         }
     }

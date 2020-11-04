@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GIGAPuppetMaster.domain;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -14,7 +15,7 @@ namespace GIGAClient.services
             this.gigaClientService = GIGAClientService;
         }
 
-        public bool Partition(int replicationFactor, string partitionName, string servers)
+        public bool Partition(int replicationFactor, string partitionName, GIGAServerObject[] servers)
         {
             throw new NotImplementedException();
         }

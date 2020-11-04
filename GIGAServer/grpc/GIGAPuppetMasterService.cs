@@ -1,5 +1,7 @@
 ﻿using GIGAPuppetMasterProto;
+using GIGAServer.domain;
 using Grpc.Core;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GIGAServer.grpc
@@ -16,8 +18,8 @@ namespace GIGAServer.grpc
         public override Task<PartitionReply> PartitionService(PartitionRequest request, ServerCallContext context)
         {
             int replicationFactor = request.ReplicationFactor;
-            string partitionName = request.Id;
-            string servers = request.Servers;
+            string partitionName = request.PartitionId;
+            GIGAServerObject[] servers = request.Servers.Select(server => new GIGAServerObject(server.Id, server.Url)).ToArray();
 
             return Task.FromResult(new PartitionReply { Ok = gigaPuppetMasterService.Partition(replicationFactor, partitionName, servers) });
         }
