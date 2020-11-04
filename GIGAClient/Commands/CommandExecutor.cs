@@ -1,4 +1,5 @@
 ﻿using GIGAClient.Scripts.Commands;
+using GIGAClient.services;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -12,17 +13,26 @@ namespace GIGAClient.Commands
     {
         private HashSet<ICommand> commands;
         public static int LoopCount = 0;
-        public static Dictionary<ICommand, string[]> LoopCommands;
+        public static Dictionary<ICommand, string[]> LoopCommands = new Dictionary<ICommand, string[]>();
+        private readonly GIGAClientService gigaClientService;
 
-        public CommandExecutor()
+        public CommandExecutor(services.GIGAClientService gigaClientService)
         {
             this.commands = new HashSet<ICommand>();
-
+ 
+            commands.Add(new ReadCommand());
+            commands.Add(new WriteCommand());
+            commands.Add(new ListServerCommand());
+            commands.Add(new ListGlobalCommand());
             commands.Add(new WaitCommand());
+            commands.Add(new BeginRepeatCommand());
+            commands.Add(new EndRepeatCommand());
             
+            this.gigaClientService = gigaClientService;
+         
         }
 
-        public void Run(string Input, ClientLogic client)
+        public void Run(string Input)
         {
             string[] SplitInput = Regex.Replace(Input.Trim(), @"\s+", " ").Split(" ");
 
@@ -46,7 +56,7 @@ namespace GIGAClient.Commands
             try
             {
                 if (LoopCount == 0 || Command is EndRepeatCommand)
-                    Command.Execute(ArgsList.ToArray(), client);
+                    Command.Execute(ArgsList.ToArray(), gigaClientService);
                 else
                     LoopCommands.Add(Command, ArgsList.ToArray());
             }

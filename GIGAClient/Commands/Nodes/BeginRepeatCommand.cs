@@ -1,4 +1,5 @@
 ﻿using GIGAClient.Commands;
+using GIGAClient.services;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,7 +16,7 @@ namespace GIGAClient.Scripts.Commands
 
         public int NumArgs => 1;
 
-        void ICommand.SafeExecute(string[] Args, ClientLogic client)
+        void ICommand.SafeExecute(string[] Args, GIGAClientService service)
         {
             string v = Args[0];
             // TODO: validate argument as integer

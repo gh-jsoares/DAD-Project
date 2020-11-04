@@ -15,9 +15,11 @@ namespace GIGAClient.Scripts.Commands
 
         public int NumArgs => 1;
 
-        void ICommand.SafeExecute(string[] Args, ClientLogic client)
+        void ICommand.SafeExecute(string[] Args, services.GIGAClientService service)
         {
-            throw new NotImplementedException();
+            string serverId = Args[0];
+
+            service.listServer(serverId);
         }
     }
 }

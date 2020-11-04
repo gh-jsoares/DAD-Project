@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <Protobuf Include="..\PupperMaster\protos\GIGAPuppetMaster.proto" Link="protos\GIGAPuppetMaster.proto" GrpcServices="Server" />
+	<Protobuf Include="..\GIGAServer\protos\GIGAServer.proto" Link="protos\GIGAServer.proto" GrpcServices="Server" />
   </ItemGroup>
 
 </Project>

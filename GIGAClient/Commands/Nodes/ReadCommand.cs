@@ -15,9 +15,12 @@ namespace GIGAClient.Scripts.Commands
 
         public int NumArgs => 3;
 
-        void ICommand.SafeExecute(string[] Args, ClientLogic client)
+        void ICommand.SafeExecute(string[] Args, services.GIGAClientService service)
         {
-            throw new NotImplementedException();
+            string partitionId = Args[0];
+            string objectId = Args[1];
+            string serverId = Args[2];
+            service.read(partitionId, objectId, serverId);
         }
     }
 }

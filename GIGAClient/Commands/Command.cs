@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GIGAClient.services;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -10,11 +11,12 @@ namespace GIGAClient.Commands
         string Syntax { get; }
         string Description { get; }
         int NumArgs { get; }
+        
 
-        public void Execute(string[] Args, ClientLogic client)
+        public void Execute(string[] Args, GIGAClientService service)
         {
             ValidadeArgs(Args);
-            SafeExecute(Args, client);
+            SafeExecute(Args, service);
         }
 
         protected void ValidadeArgs(string[] Args)
@@ -26,7 +28,8 @@ namespace GIGAClient.Commands
             }
         }
 
-        protected void SafeExecute(string[] Args, ClientLogic client);
+        protected void SafeExecute(string[] Args, GIGAClientService service);
+  
     }
 
    /* interface ICommand<T> : ICommand

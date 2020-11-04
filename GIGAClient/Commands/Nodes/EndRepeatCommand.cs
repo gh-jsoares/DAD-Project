@@ -16,7 +16,7 @@ namespace GIGAClient.Scripts.Commands
 
         public int NumArgs => 0;
 
-        void ICommand.SafeExecute(string[] Args, ClientLogic client)
+        void ICommand.SafeExecute(string[] Args, services.GIGAClientService service)
         {
             int currentLoop = 0;
             while (CommandExecutor.LoopCount > 0)
@@ -24,7 +24,7 @@ namespace GIGAClient.Scripts.Commands
                 foreach (KeyValuePair<ICommand, string[]> entry in CommandExecutor.LoopCommands)
                 {
                     string[] args = entry.Value.Select(arg => arg.Replace("$i", currentLoop.ToString())).ToArray();
-                    entry.Key.Execute(args, client);
+                    entry.Key.Execute(args, service);
                 }
 
                 CommandExecutor.LoopCount--;

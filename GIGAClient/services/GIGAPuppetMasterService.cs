@@ -1,57 +1,28 @@
-﻿using GIGAClient.Commands;
-using Grpc.Core;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace GIGAClient.services
 {
-    class GIGAPuppetMasterService : GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceBase
+    class GIGAPuppetMasterService
     {
-        private ClientLogic clientLogic;
+        private GIGAClientService gigaClientService;
 
-        public GIGAPuppetMasterService(ClientLogic clientLogic)
+
+        public GIGAPuppetMasterService(GIGAClientService GIGAClientService)
         {
-            this.clientLogic = clientLogic;
+            this.gigaClientService = GIGAClientService;
         }
 
-        public override Task<GIGAPuppetMasterProto.StatusReply> StatusService(GIGAPuppetMasterProto.StatusRequest request, ServerCallContext context)
+        public bool Partition(int replicationFactor, string partitionName, string servers)
         {
-            return Task.FromResult(HandleStatusService(request));
+            throw new NotImplementedException();
         }
 
-        public GIGAPuppetMasterProto.StatusReply HandleStatusService(GIGAPuppetMasterProto.StatusRequest request)
+        public bool Status()
         {
-
-            Console.WriteLine($"Client {clientLogic.Username} is up in URL {clientLogic.Url}");
-
-            return new GIGAPuppetMasterProto.StatusReply
-            {
-                Ok = true
-            };
+            return gigaClientService.ShowStatus();
         }
-
-
-        public override Task<GIGAPuppetMasterProto.PartitionReply> PartitionService(GIGAPuppetMasterProto.PartitionRequest request, ServerCallContext context)
-        {
-            return Task.FromResult(HandlePartitionService(request));
-        }
-
-        public GIGAPuppetMasterProto.PartitionReply HandlePartitionService(GIGAPuppetMasterProto.PartitionRequest request)
-        {
-
-            string[] arrayServer = request.Servers.Split(" ");
-
-            clientLogic.PartitionMap.Add(request.Id, arrayServer);
-
-            Console.WriteLine($"Added new Partition {request.Id} with {arrayServer.Length} servers: {request.Servers}");
-
-
-            return new GIGAPuppetMasterProto.PartitionReply
-            {
-                Ok = true
-            };
-        }
+      
     }
 }
