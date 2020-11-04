@@ -16,6 +16,7 @@ namespace GIGAServer.domain
             Partition = partition ?? throw new ArgumentNullException(nameof(partition));
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Value = value ?? throw new ArgumentNullException(nameof(value));
+            Locked = false;
         }
     }
 }

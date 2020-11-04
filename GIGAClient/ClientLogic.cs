@@ -5,7 +5,6 @@ using System.Transactions;
 using GIGAClient.Commands;
 using GIGAClient.services;
 using Grpc.Core;
-using PuppetMaster;
 
 namespace GIGAClient
 {
@@ -19,8 +18,6 @@ namespace GIGAClient
         private Dictionary<string, string[]> partitionMap = new Dictionary<string, string[]>();
 
         private CommandExecutor commandExecutor = new CommandExecutor();
-
-        
 
         public ClientLogic(string[] args)
         {
@@ -36,12 +33,12 @@ namespace GIGAClient
 
             Server server = new Server                              
             {
-                Services = { GIGAPuppetMasterProtoService.BindService(new GIGAPuppetMasterService(this)) },
+                Services = { GIGAPuppetMasterProto.GIGAPuppetMasterService.BindService(new GIGAPuppetMasterService(this)) },
                 Ports = { new ServerPort(uri.Host, uri.Port, ServerCredentials.Insecure) }
             };
 
             server.Start();
-            Console.WriteLine($"Client server listening on host {uri.Host} and port {uri.Port} ");
+            Console.WriteLine("Client \"Puppet Master Server\" listening on url {0}", uri.AbsoluteUri);
         }
 
         internal void readCommands()

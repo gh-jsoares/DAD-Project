@@ -1,9 +1,13 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="protos\GIGAServer.proto" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="3.13.0" />
@@ -14,6 +18,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <Protobuf Include="protos\GIGAServer.proto" GrpcServices="Server" />
+    <Protobuf Include="protos\GIGAPartition.proto" GrpcServices="Both" />
+    <Protobuf Include="..\PupperMaster\protos\GIGAPuppetMaster.proto" Link="protos\GIGAPuppetMaster.proto" GrpcServices="Server" />
   </ItemGroup>
 
 </Project>

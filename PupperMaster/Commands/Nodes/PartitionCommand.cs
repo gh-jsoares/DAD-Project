@@ -39,9 +39,9 @@ namespace PuppetMaster.Scripts.Commands
             {
 
                 GrpcChannel channel = GrpcChannel.ForAddress(entry.Value);
-                GIGAPuppetMasterProtoService.GIGAPuppetMasterProtoServiceClient client = new GIGAPuppetMasterProtoService.GIGAPuppetMasterProtoServiceClient(channel);
+                GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient client = new GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient(channel);
 
-                PartitionReply reply = client.PartitionService(new PartitionRequest
+                GIGAPuppetMasterProto.PartitionReply reply = client.PartitionService(new GIGAPuppetMasterProto.PartitionRequest
                 {
                     Id = Args[1],
                     Servers =   string.Join(" ", (string[])arrayServer.ToArray(typeof(string))) 

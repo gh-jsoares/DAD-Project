@@ -13,7 +13,7 @@ namespace GIGAClient
             commands = new CommandExecutor();
 
             Console.WriteLine($"{args.Length}");
-            
+
             //When client is initiated with a PuppetMaster command
             if (args.Length == 3)
             {

@@ -26,9 +26,9 @@ namespace PuppetMaster.Scripts.Commands
             {
                 
                 GrpcChannel channel = GrpcChannel.ForAddress(entry.Value);
-                GIGAPuppetMasterProtoService.GIGAPuppetMasterProtoServiceClient client = new GIGAPuppetMasterProtoService.GIGAPuppetMasterProtoServiceClient(channel);
+                GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient client = new GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient(channel);
 
-                StatusReply reply = client.StatusService(new StatusRequest
+                GIGAPuppetMasterProto.StatusReply reply = client.StatusService(new GIGAPuppetMasterProto.StatusRequest
                 {
 
                 });

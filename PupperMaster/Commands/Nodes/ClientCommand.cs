@@ -3,8 +3,6 @@ using PuppetMaster.Commands;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Text;
 
 namespace PuppetMaster.Scripts.Commands
 {
@@ -41,24 +39,14 @@ namespace PuppetMaster.Scripts.Commands
 
             //Send Partitions to client
             GrpcChannel channel = GrpcChannel.ForAddress(Args[1]);
-            GIGAPuppetMasterProtoService.GIGAPuppetMasterProtoServiceClient client = new GIGAPuppetMasterProtoService.GIGAPuppetMasterProtoServiceClient(channel);
+            GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient client = new GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient(channel);
 
             foreach (KeyValuePair < string, string[]> entry in PuppetMaster.PartitionMap)
             {
-                PartitionReply reply = client.PartitionService(new PartitionRequest
+                GIGAPuppetMasterProto.PartitionReply reply = client.PartitionService(new GIGAPuppetMasterProto.PartitionRequest
                 {
                     Id = entry.Key,
                     Servers = string.Join(" ", entry.Value)  
-                });
-            }
-
-            //Send servers to client
-            foreach (KeyValuePair<string, string> entry in PuppetMaster.ServerMap)
-            {
-                ServerReply reply = client.ServerService(new ServerRequest
-                {
-                    Id = entry.Key,
-                    Url = entry.Value
                 });
             }
 

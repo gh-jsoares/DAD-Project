@@ -1,5 +1,4 @@
-﻿using GIGAServer.services;
-using Grpc.Core;
+﻿using Grpc.Core;
 using System;
 
 namespace GIGAServer
@@ -8,36 +7,46 @@ namespace GIGAServer
     {
         static void Main(string[] args)
         {
-            int port;
-            string hostname;
+            int port = 1001;
+            string hostname = "localhost";
+            int minDelay = 0;
+            int maxDelay = 0;
+            string id = "0";
 
-            if(args.Length != 4)
+            if(args.Length == 4)
             {
-                port = 1001;
-                hostname = "localhost";
-            }
-            else
-            {
+                id = args[0];
+
                 Uri uri = new Uri(args[1]);
 
                 port = uri.Port;
                 hostname = uri.Host;
+
+                minDelay = int.Parse(args[2]);
+                maxDelay = int.Parse(args[3]);
             }
-            string startupMessage;
+
             ServerPort serverPort;
 
             serverPort = new ServerPort(hostname, port, ServerCredentials.Insecure);
-            startupMessage = "Insecure GIGAStore server listening on port " + port;
+
+            services.GIGAServerService gigaServerService = new services.GIGAServerService(id, hostname, port, minDelay, maxDelay);
+            services.GIGAPartitionService gigaPartitionService = new services.GIGAPartitionService();
+            services.GIGAPuppetMasterService gigaPuppetMasterService = new services.GIGAPuppetMasterService(gigaServerService, gigaPartitionService);
 
             Server server = new Server
             {
-                Services = { GIGAServerProtoService.BindService(new GIGAServerService()) },
+                Services = {
+                    GIGAServerProto.GIGAServerService.BindService(new grpc.GIGAServerService()),
+                    GIGAPuppetMasterProto.GIGAPuppetMasterService.BindService(new grpc.GIGAPuppetMasterService(gigaPuppetMasterService))
+                },
                 Ports = { serverPort }
             };
 
             server.Start();
 
-            Console.WriteLine(startupMessage);
+
+            Console.WriteLine("Insecure GIGAStore server listening on port " + port);
             //Configuring HTTP for client connections in Register method
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 

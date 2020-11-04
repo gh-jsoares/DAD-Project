@@ -1,8 +1,8 @@
 ﻿syntax = "proto3";
 
-package GIGAServerProto;
+package GIGAPartitionProto;
 
-service GIGAServerService {
+service GIGAPartitionService {
 	rpc Test (TestRequest) returns (TestReply);
 }
 

@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package GIGAPuppetMasterProto;
+
+service GIGAPuppetMasterService {
+  rpc ServerService (ServerRequest) returns (ServerReply);
+  rpc FreezeServerService (FreezeServerRequest) returns (FreezeServerReply);
+  rpc UnfreezeServerService (UnfreezeServerRequest) returns (UnfreezeServerReply);
+  rpc StatusService (StatusRequest) returns (StatusReply);
+  rpc PartitionService (PartitionRequest) returns (PartitionReply); 
+  rpc CrashServerService (CrashServerRequest) returns (CrashServerReply); 
+}
+
+/* Server Command */
+message ServerRequest {
+	string id = 1;
+	string url = 2;
+}
+
+message ServerReply {
+	bool ok = 1;
+}
+
+/* Freeze Command */
+message FreezeServerRequest {
+}
+
+message FreezeServerReply {
+	bool ok = 1;
+}
+
+/* Unfreeze Command */
+message UnfreezeServerRequest {
+}
+
+message UnfreezeServerReply {
+	bool ok = 1;
+}
+
+/* Status Command */
+message StatusRequest {
+
+}
+
+message StatusReply {
+	bool ok = 1;
+}
+
+/* Partition Command */
+message PartitionRequest {
+	int32 replication_factor = 1;
+	string id = 2;
+	string servers = 3;
+}
+
+message PartitionReply {
+	bool ok = 1;
+}
+
+/* Crash Command */
+message CrashServerRequest {
+}
+
+message CrashServerReply {
+	bool ok = 1;
+}
+
