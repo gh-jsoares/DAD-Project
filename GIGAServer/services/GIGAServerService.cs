@@ -46,10 +46,9 @@ namespace GIGAServer.services
             return true; // success?
         }
 
-        public bool ShowStatus()
+        public void ShowStatus()
         {
-            // TODO PRINT STATUS INFORMATION TO CONSOLE
-            return true;
+            Console.WriteLine($"Server {Server.Name} up on URL {Server.Url}");
         }
 
         public bool Crash()
