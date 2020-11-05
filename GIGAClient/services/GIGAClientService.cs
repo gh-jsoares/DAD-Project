@@ -66,17 +66,17 @@ namespace GIGAClient.services
         {
             if (currentPartition == null || currentPartition.Name != partitionId) ConnectToPartition(partitionId);
             ReadReply reply = client.Read(new ReadRequest { ObjectId = objectId, PartitionId = partitionId });
-            if (reply.Value == "" && serverId != "-1")
+            if (!reply.Ok && serverId != "-1")
             {
                 Console.WriteLine("Object <{0},{1}> not found in server \"{2}\"", partitionId, objectId, currentServer.Name);
                 ConnectToPartitionServer(partitionId, serverId);
                 reply = client.Read(new ReadRequest { ObjectId = objectId, PartitionId = partitionId });
             }
 
-            if (reply.Value == "")
-                Console.WriteLine("Object <{0},{1}> not found in current server", partitionId, objectId);
-            else
+            if (reply.Ok)
                 Console.WriteLine("Object <{0},{1}> found in server \"{2}\" with value: {3}", partitionId, objectId, currentServer.Name, reply.Value);
+            else
+                Console.WriteLine("Object <{0},{1}> not found in current server", partitionId, objectId);
         }
 
         internal bool RegisterPartition(string partitionName, int replicationFactor, GIGAServerObject[] servers)
@@ -88,20 +88,33 @@ namespace GIGAClient.services
             return true;
         }
 
-        public void write(string partitionId, string objectId, String value)
+        public void write(string partitionId, string objectId, string value)
         {
-            //TODO: locking mechanism
-            string server_id = gigaClientObject.PartitionMap[partitionId].Servers.Values.First().Name;
-            string url = gigaClientObject.ServerMap[server_id];
-            GrpcChannel channel = GrpcChannel.ForAddress(url);
-            GIGAServerService.GIGAServerServiceClient client = new GIGAServerService.GIGAServerServiceClient(channel);
-            client.Write(new WriteRequest { PartitionId = partitionId, ObjectId = objectId, Value = value});
+            if (currentPartition == null || currentPartition.Name != partitionId) ConnectToPartition(partitionId);
+            WriteReply reply = client.Write(new WriteRequest { PartitionId = partitionId, ObjectId = objectId, Value = value});
+
+            if (!reply.Ok)
+            {
+                Console.WriteLine("Current server is not master.");
+                ConnectToPartitionServer(partitionId, reply.MasterServer);
+                reply = client.Write(new WriteRequest { PartitionId = partitionId, ObjectId = objectId, Value = value});
+            }
+
+            if (reply.Ok)
+                Console.WriteLine("Object <{0},{1}> written in server \"{2}\" with value: {3}", partitionId, objectId, currentServer.Name, value);
+            else
+                Console.WriteLine("An error occurred.");
         }
 
         public void listServer(string serverId)
         {
             if (currentServer == null || currentServer.Name != serverId) ConnectToServer(serverId);
-            client.ListServer(new ListServerRequest { ServerId = currentServer.Name });
+            ListServerReply reply = client.ListServer(new ListServerRequest { ServerId = currentServer.Name });
+            Console.WriteLine("List of entries: Partition => Object");
+            foreach (var item in reply.Objects)
+            {
+                Console.WriteLine("{0} => {1} | Is Master: {2}", item.PartitionId, item.ObjectId, item.IsMaster);
+            }
         }
 
         internal bool ShowStatus()
@@ -117,7 +130,7 @@ namespace GIGAClient.services
             Console.WriteLine("List of entries: Partition => Object");
             foreach (var item in reply.Objects)
             {
-                Console.WriteLine("{0} => {1} | Is Master: {2}", item.PartitionId, item.ObjectId, item.IsMaster);
+                Console.WriteLine("{0} => {1}", item.PartitionId, item.ObjectId);
             }
         }
 

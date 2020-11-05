@@ -19,6 +19,7 @@ message ReadReply {
 	string partition_id = 1;
 	string object_id = 2;
 	string value = 3;
+	bool ok = 4;
 }
 
 /* Write Command */ 
@@ -30,6 +31,7 @@ message WriteRequest {
 
 message WriteReply{
 	bool ok = 1;
+	string master_server = 2;
 }
 
 /* List Global Command */ 

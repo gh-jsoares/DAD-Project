@@ -2,6 +2,7 @@
 using GIGAServerProto;
 using Grpc.Core;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -21,10 +22,18 @@ namespace GIGAServer.grpc
         public override Task<ReadReply> Read(ReadRequest request, ServerCallContext context)
         {
             GIGAObject obj = gigaPartitionService.Read(request.PartitionId, request.ObjectId);
-            ReadReply reply = new ReadReply();
+            ReadReply reply = new ReadReply { Ok = false };
 
             if (obj != null)
-                reply = new ReadReply { Value = obj.Value, ObjectId = obj.Name, PartitionId = obj.Partition.Name };
+                reply = new ReadReply { Value = obj.Value, ObjectId = obj.Name, PartitionId = obj.Partition.Name, Ok = true };
+
+            return Task.FromResult(reply);
+        }
+
+        public override Task<WriteReply> Write(WriteRequest request, ServerCallContext context)
+        {
+            KeyValuePair<bool, string> result = gigaPartitionService.Write(request.PartitionId, request.ObjectId, request.Value);
+            WriteReply reply = new WriteReply { Ok = result.Key, MasterServer = result.Value };
 
             return Task.FromResult(reply);
         }
@@ -37,7 +46,7 @@ namespace GIGAServer.grpc
             {
                 PartitionId = objectId.PartitionName,
                 ObjectId = objectId.ObjectName,
-                IsMaster = true
+                IsMaster = objectId.MasterServerName == gigaServerService.Server.Name
             }));
 
             return Task.FromResult(reply);

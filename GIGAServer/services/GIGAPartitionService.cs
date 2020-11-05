@@ -48,12 +48,22 @@ namespace GIGAServer.services
 
             foreach (GIGAPartition partition in partitions.Values.Where(p => p.HasServer(serverId)))
             {
-                partition.Write("obj-1", "value-1");
-                Console.WriteLine("ADDED");
                 result.AddRange(partition.GetPartitionObjectIDList());
             }
 
             return result;
+        }
+
+        internal KeyValuePair<bool, string> Write(string partitionId, string objectId, string value)
+        {
+            Console.WriteLine("Added");
+            GIGAPartition partition = partitions[partitionId];
+            if (!partition.IsMaster(gigaServerService.Server))
+            {
+                return new KeyValuePair<bool, string>(false, partition.Master.Name);
+            }
+            partition.Write(objectId, value);
+            return new KeyValuePair<bool, string>(true, "");
         }
 
         internal List<GIGAPartitionObjectID> ListGlobal()

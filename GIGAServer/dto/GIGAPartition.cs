@@ -11,6 +11,8 @@ namespace GIGAServer.dto
         private Dictionary<string, GIGAPartitionProto.GIGAPartitionService.GIGAPartitionServiceClient> partitionMap =
             new Dictionary<string, GIGAPartitionProto.GIGAPartitionService.GIGAPartitionServiceClient>();
 
+        public GIGAServerObject Master { get { return partition.MasterServer; } }
+
         public GIGAPartition(string name, int replicationFactor, GIGAServerObject[] servers)
         {
             partition = new GIGAPartitionObject(name, replicationFactor, servers);
@@ -44,6 +46,11 @@ namespace GIGAServer.dto
         {
             // TODO MISSING LOCK
             partition.Write(name, value);
+        }
+
+        internal bool IsMaster(GIGAServerObject server)
+        {
+            return server.Name == Master.Name;
         }
     }
 }
