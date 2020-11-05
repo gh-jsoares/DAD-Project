@@ -3,6 +3,8 @@ using GIGAServer.dto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace GIGAServer.services
 {
@@ -18,8 +20,17 @@ namespace GIGAServer.services
             this.gigaServerService = gigaServerService;
         }
 
+        public void CheckFrozenServer()
+        {
+            while(gigaServerService.Frozen)
+            {
+                Thread.Sleep(2000);
+            }
+        }
+
         public bool RegisterPartition(string id, int replicationFactor, GIGAServerObject[] servers)
         {
+            CheckFrozenServer();
             if (partitions.ContainsKey(id)) return false;
 
             partitions.Add(id, new GIGAPartition(id, replicationFactor, servers));
@@ -29,12 +40,14 @@ namespace GIGAServer.services
 
         internal GIGAObject Read(string partitionId, string objectId)
         {
+            CheckFrozenServer();
             if (!partitions.ContainsKey(partitionId)) return null;
             return partitions[partitionId].Read(objectId);
         }
 
         internal void ShowStatus()
         {
+            CheckFrozenServer();
             Console.WriteLine("Current Partitions:");
             foreach (KeyValuePair<string, GIGAPartition> entry in partitions)
             {
@@ -44,6 +57,7 @@ namespace GIGAServer.services
 
         internal List<GIGAPartitionObjectID> ListObjects(string serverId)
         {
+            CheckFrozenServer();
             List<GIGAPartitionObjectID> result = new List<GIGAPartitionObjectID>();
 
             foreach (GIGAPartition partition in partitions.Values.Where(p => p.HasServer(serverId)))
@@ -56,6 +70,7 @@ namespace GIGAServer.services
 
         internal KeyValuePair<bool, string> Write(string partitionId, string objectId, string value)
         {
+            CheckFrozenServer();
             Console.WriteLine("Added");
             GIGAPartition partition = partitions[partitionId];
             if (!partition.IsMaster(gigaServerService.Server))
@@ -68,6 +83,7 @@ namespace GIGAServer.services
 
         internal List<GIGAPartitionObjectID> ListGlobal()
         {
+            CheckFrozenServer();
             List<GIGAPartitionObjectID> result = new List<GIGAPartitionObjectID>();
 
             foreach (GIGAPartition partition in partitions.Values)

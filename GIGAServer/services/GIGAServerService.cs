@@ -12,7 +12,7 @@ namespace GIGAServer.services
     {
         public GIGAServerObject Server { get; }
         public int ReplicationFactor { get; set; }
-        private bool frozen = false;
+        public bool Frozen { get; private set; } = false;
         private int minDelay;
         private int maxDelay;
 
@@ -22,28 +22,17 @@ namespace GIGAServer.services
             this.maxDelay = maxDelay;
             Server = new GIGAServerObject(id, string.Format("http://{0}:{1}", hostname, port));
         }
-
-        public string Read(string partitionId, string objectId)
-        {
-            // TODO
-            return null;
-        }
-
-        public void Write(string partitionId, GIGAObject value)
-        {
-            // TODO
-        }
         
         public bool Unfreeze()
         {
-            frozen = false;
-            return true; // success?
+            Frozen = false;
+            return true;
         }
 
         public bool Freeze()
         {
-            frozen = true;
-            return true; // success?
+            Frozen = true;
+            return true;
         }
 
         public void ShowStatus()
