@@ -41,9 +41,13 @@ namespace GIGAClient
 
 
                 //Ler script
+                
                 try
                 {
+                    Console.WriteLine("Waiting for partition to register");
                     string[] scriptCommands = System.IO.File.ReadAllLines(@"..\..\..\..\GIGAClient\files\scripts\" + file);
+
+                    Thread.Sleep(2000);
 
                     foreach (string s in scriptCommands)
                     {
