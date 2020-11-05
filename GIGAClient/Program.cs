@@ -2,6 +2,7 @@
 using GIGAClient.Scripts.Commands;
 using Grpc.Core;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace GIGAClient
@@ -37,6 +38,23 @@ namespace GIGAClient
 
                 server.Start();
                 Console.WriteLine("Client \"Puppet Master Server\" listening on url {0}", uri.AbsoluteUri);
+
+
+                //Ler script
+                try
+                {
+                    string[] scriptCommands = System.IO.File.ReadAllLines(@"..\..\..\..\GIGAClient\files\scripts\" + file);
+
+                    foreach (string s in scriptCommands)
+                    {
+                        Console.WriteLine(s);
+                        commands.Run(s);
+                    }
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
 
                 string command;
 
