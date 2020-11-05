@@ -15,12 +15,14 @@ namespace GIGAClient.domain
         public string Username { get; }
         public string Url { get; }
         public string File { get; }
+        public string AttachedServer { get; }
 
         public GIGAClientObject(string username, string url, string file)
         {
             Username = username ?? throw new ArgumentNullException(nameof(username));
             Url = url ?? throw new ArgumentNullException(nameof(url));
             File = file ?? throw new ArgumentNullException(nameof(file));
+            AttachedServer = null;
         }
 
 

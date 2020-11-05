@@ -1,6 +1,8 @@
 ﻿using GIGAClient.domain;
 using GIGAServerProto;
 using Google.Protobuf.WellKnownTypes;
+using Grpc.Core;
+using Grpc.Net.Client;
 using System;
 using System.Collections.Generic;
 
@@ -17,19 +19,34 @@ namespace GIGAClient.services
             gigaClientObject = new GIGAClientObject(name, url, file);
         }
 
-        public void read(string partitionId, string objecetId, string serverId)
+        public void read(string partitionId, string objectId, string serverId)
         {
-            throw new NotImplementedException();
+            //TODO: No caso de ja estar attached como aceder ao channel?
+            if(gigaClientObject.AttachedServer == null)
+            {
+                string url = gigaClientObject.ServerMap[serverId];
+                GrpcChannel channel = GrpcChannel.ForAddress(url);
+                GIGAServerService.GIGAServerServiceClient client = new GIGAServerService.GIGAServerServiceClient(channel);
+                client.Read(new ReadRequest { ObjectId = objectId, PartitionId = partitionId });
+            }
         }
 
         public void write(string partitionId, string objectId, String value)
         {
-            throw new NotImplementedException();
+            //TODO: locking mechanism
+            string server_id = gigaClientObject.PartitionMap[partitionId][0];
+            string url = gigaClientObject.ServerMap[server_id];
+            GrpcChannel channel = GrpcChannel.ForAddress(url);
+            GIGAServerService.GIGAServerServiceClient client = new GIGAServerService.GIGAServerServiceClient(channel);
+            client.Write(new WriteRequest { PartitionId = partitionId, ObjectId = objectId, Value = value});
         }
 
         public void listServer(string serverId)
         {
-            throw new NotImplementedException();
+            string url = gigaClientObject.ServerMap[serverId];
+            GrpcChannel channel = GrpcChannel.ForAddress(url);
+            GIGAServerService.GIGAServerServiceClient client = new GIGAServerService.GIGAServerServiceClient(channel);
+            client.ListServer(new ListServerRequest { ServerId = serverId });
         }
 
         internal bool ShowStatus()

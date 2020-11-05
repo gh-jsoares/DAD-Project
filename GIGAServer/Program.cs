@@ -37,7 +37,7 @@ namespace GIGAServer
             Server server = new Server
             {
                 Services = {
-                    GIGAServerProto.GIGAServerService.BindService(new grpc.GIGAServerService()),
+                    GIGAServerProto.GIGAServerService.BindService(new grpc.GIGAServerService(gigaServerService)),
                     GIGAPuppetMasterProto.GIGAPuppetMasterService.BindService(new grpc.GIGAPuppetMasterService(gigaPuppetMasterService))
                 },
                 Ports = { serverPort }

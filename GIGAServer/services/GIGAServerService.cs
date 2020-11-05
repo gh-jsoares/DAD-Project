@@ -26,7 +26,7 @@ namespace GIGAServer.services
             server = new GIGAServerObject(id, string.Format("http://{0}:{1}", hostname, port));
         }
 
-        public GIGAObject Read(string partitionId, string objectId)
+        public string Read(string partitionId, string objectId)
         {
             // TODO
             return null;
@@ -36,7 +36,7 @@ namespace GIGAServer.services
         {
             // TODO
         }
-
+        
         public bool Unfreeze()
         {
             frozen = false;
@@ -59,6 +59,12 @@ namespace GIGAServer.services
             // delay in order to respond to puppet master request
             new Timer(delegate { Process.GetCurrentProcess().Kill(); }, null, 2000, Timeout.Infinite);
             return true;
+        }
+
+        public void ListServer()
+        {
+            //TODO return all the objects
+           
         }
     }
 }
