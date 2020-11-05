@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using GIGAPuppetMaster.domain;
 using Grpc.Net.Client;
 using PuppetMaster.Commands;
 
@@ -7,7 +8,11 @@ namespace PuppetMaster
 {
     class PuppetMasterLogic
     {
-        CommandExecutor commands;
+        private CommandExecutor commands;
+        public Dictionary<string, GIGAServerObject> ServerMap { get; } = new Dictionary<string, GIGAServerObject>();
+        public Dictionary<string, GIGAPartitionObject> PartitionMap { get; } = new Dictionary<string, GIGAPartitionObject>();
+        public Dictionary<string, string> ClientMap { get; set; } = new Dictionary<string, string>();
+        public int ReplicationFactor { get; set; }
 
         public PuppetMasterLogic()
         {
@@ -22,9 +27,5 @@ namespace PuppetMaster
         
         }
 
-        public Dictionary<string, string> ClientMap { get; set; } = new Dictionary<string, string>();
-        public Dictionary<string, string> ServerMap { get; set; } = new Dictionary<string, string>();
-        public int ReplicationFactor { get; set; }
-        public Dictionary<string, string[]> PartitionMap { get; set; } = new Dictionary<string, string[]>();
     }
 }

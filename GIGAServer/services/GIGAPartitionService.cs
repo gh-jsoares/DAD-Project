@@ -1,5 +1,6 @@
 ﻿using GIGAServer.domain;
-using GIGAServer.logic;
+using GIGAServer.dto;
+using System;
 using System.Collections.Generic;
 
 namespace GIGAServer.services
@@ -10,10 +11,22 @@ namespace GIGAServer.services
         public int ReplicationFactor { get; set; }
 
 
-        public void RegisterPartition(string id, int replicationFactor, GIGAServerObject[] servers)
+        public bool RegisterPartition(string id, int replicationFactor, GIGAServerObject[] servers)
         {
+            if (partitions.ContainsKey(id)) return false;
+
             partitions.Add(id, new GIGAPartition(id, replicationFactor, servers));
+
+            return true;
         }
 
+        internal void ShowStatus()
+        {
+            Console.WriteLine("Current Partitions:");
+            foreach (KeyValuePair<string, GIGAPartition> entry in partitions)
+            {
+                entry.Value.ShowStatus();
+            }
+        }
     }
 }

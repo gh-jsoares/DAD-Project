@@ -1,8 +1,9 @@
 ﻿using GIGAServer.domain;
 using Grpc.Net.Client;
+using System;
 using System.Collections.Generic;
 
-namespace GIGAServer.logic
+namespace GIGAServer.dto
 {
     class GIGAPartition
     {
@@ -17,6 +18,11 @@ namespace GIGAServer.logic
             {
                 partitionMap.Add(name, new GIGAPartitionProto.GIGAPartitionService.GIGAPartitionServiceClient(GrpcChannel.ForAddress(server.Url)));
             }
+        }
+
+        internal void ShowStatus()
+        {
+            partition.ShowStatus();
         }
     }
 }

@@ -1,8 +1,8 @@
 ﻿using GIGAPuppetMasterProto;
 using GIGAServer.domain;
-using GIGAServer.logic;
+using GIGAServer.dto;
 using System;
-using System.Collections.Generic;
+using System.Reflection;
 
 namespace GIGAServer.services
 {
@@ -17,14 +17,17 @@ namespace GIGAServer.services
             this.gigaPartitionService = gigaPartitionService;
         }
 
-        public bool Partition(int replicationFactor, string partitionName, string servers)
+        public bool Partition(int replicationFactor, string partitionName, GIGAServerObject[] servers)
         {
-            throw new NotImplementedException();
+            return gigaPartitionService.RegisterPartition(partitionName, replicationFactor, servers);
         }
 
         public bool Status()
         {
-            return gigaServerService.ShowStatus();
+            gigaServerService.ShowStatus();
+            gigaPartitionService.ShowStatus();
+
+            return true;
         }
         public bool Freeze()
         {

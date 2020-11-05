@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GIGAServer.domain
+namespace GIGAPuppetMaster.domain
 {
     class GIGAServerObject
     {
@@ -11,11 +11,6 @@ namespace GIGAServer.domain
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Url = url ?? throw new ArgumentNullException(nameof(url));
-        }
-
-        public override string ToString()
-        {
-            return string.Format("\"{0}\" @ {1}", Name, Url);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using GIGAServer.domain;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace GIGAServer.domain
@@ -24,11 +25,17 @@ namespace GIGAServer.domain
             Name = name ?? throw new ArgumentNullException(nameof(name));
             ReplicationFactor = replicationFactor;
             if (servers == null) throw new ArgumentNullException(nameof(servers));
-            this.servers = new Dictionary<string, GIGAServerObject>();
+            this.servers = servers.ToDictionary(server => server.Name, server => server);
             this.objects = new Dictionary<string, GIGAObject>();
+        }
 
-            foreach (GIGAServerObject server in servers)
-                this.servers.Add(server.Name, server);
+        internal void ShowStatus()
+        {
+            Console.WriteLine("Partition \"{0}\":\n\tCurrent Master: {1}", Name, MasterServer.ToString());
+            foreach (KeyValuePair<string, GIGAServerObject> entry in servers)
+            {
+                Console.WriteLine("\t{0}", entry.Value.ToString());
+            }
         }
 
         public GIGAObject GetObject(string name)
