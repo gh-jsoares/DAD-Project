@@ -1,5 +1,5 @@
 ﻿using GIGAClient.Commands;
-using GIGAPuppetMaster.domain;
+using GIGAClient.domain;
 using Grpc.Core;
 using System;
 using System.Collections.Generic;

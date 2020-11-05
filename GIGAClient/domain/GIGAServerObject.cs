@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GIGAPuppetMaster.domain
+namespace GIGAClient.domain
 {
     class GIGAServerObject
     {
