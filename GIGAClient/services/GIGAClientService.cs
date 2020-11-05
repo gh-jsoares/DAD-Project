@@ -25,7 +25,6 @@ namespace GIGAClient.services
 
         public void ConnectToPartition(string partitionId)
         {
-            if (currentPartition.Name == partitionId && currentServer != null) return;
             currentPartition = gigaClientObject.PartitionMap[partitionId];
             currentServer = currentPartition.GetRandomServer();
             Console.WriteLine("Connecting to random server on partition \"{0}\"", partitionId);
