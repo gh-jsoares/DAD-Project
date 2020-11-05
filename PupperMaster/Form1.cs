@@ -16,20 +16,29 @@ namespace PuppetMaster
 
         PuppetMasterLogic pml;
 
-        Queue commandsList = new Queue();
+        Queue<string> commandsList = new Queue<string>();
 
         public Form1(ConfigReader cr)
         {
             InitializeComponent();
 
             pml = new PuppetMasterLogic();
-
             if(cr != null)
             {
                 foreach (string c in cr.InitialSetup)
                 {
-                    tbCommandLog.Text += pml.SendCommand(c) + "\r\n";
+                    commandsList.Enqueue(c);
                 }
+            }
+        }
+
+        private void FormShown(object sender, EventArgs e)
+        {
+
+            while (commandsList.Count > 0)
+            {
+                string command = commandsList.Dequeue();
+                tbCommandLog.AppendText(pml.SendCommand(command) + "\r\n");
             }
         }
 
@@ -53,7 +62,11 @@ namespace PuppetMaster
         {
             string[] commands = System.IO.File.ReadAllLines(@"..\..\..\files\scripts\" + tbFileName.Text);
 
-            commandsList = new Queue(commands);
+            commandsList.Clear();
+            foreach (string command in commands)
+            {
+                commandsList.Enqueue(command);
+            }
 
             btnNextStep.Enabled = true;
             btnSequence.Enabled = false;
@@ -63,7 +76,7 @@ namespace PuppetMaster
         private void btnNextStep_Click(object sender, EventArgs e)
         {
 
-            string command = (string) commandsList.Dequeue();
+            string command = commandsList.Dequeue();
 
             tbCommandLog.Text += pml.SendCommand(command) + "\r\n";
 

@@ -19,7 +19,8 @@ namespace PuppetMaster.Scripts.Commands
         {
             Console.WriteLine(Args.Length);
 
-            PuppetMaster.ReplicationFactor = Int32.Parse(Args[0]);
+            // TODO validate is int
+            PuppetMaster.ReplicationFactor = int.Parse(Args[0]);
         }
     }
 }

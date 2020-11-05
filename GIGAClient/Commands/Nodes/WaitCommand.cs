@@ -17,7 +17,9 @@ namespace GIGAClient.Scripts.Commands
 
         void ICommand.SafeExecute(string[] Args, services.GIGAClientService service)
         {
-            throw new NotImplementedException();
+            // TODO VALIDATE INT
+            int amount = int.Parse(Args[0]);
+            Thread.Sleep(amount);
         }
     }
 }

@@ -50,7 +50,6 @@ namespace PuppetMaster.Commands
             try
             {
                 return Command.Execute(ArgsList.ToArray(), puppetMaster);
-
             }
             catch (Exception e)
             {

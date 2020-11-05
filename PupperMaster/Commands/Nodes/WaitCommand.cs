@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
 namespace PuppetMaster.Scripts.Commands
 {
@@ -17,9 +18,9 @@ namespace PuppetMaster.Scripts.Commands
 
         void ICommand.SafeExecute(string[] Args, PuppetMasterLogic PuppetMaster)
         {
-            Console.WriteLine(Args.Length);
-
-
+            // TODO VALIDATE INT
+            int amount = int.Parse(Args[0]);
+            Thread.Sleep(amount);
         }
     }
 }
