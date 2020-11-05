@@ -27,5 +27,21 @@ namespace GIGAClient.domain
                 Console.WriteLine("\t\t{0}", server.ToString());
             }
         }
+
+        internal GIGAServerObject GetRandomServer()
+        {
+            Random random = new Random();
+            return Servers.Values.ElementAt(random.Next(Servers.Count));
+        }
+
+        internal GIGAServerObject GetServer(string serverId)
+        {
+            return Servers[serverId];
+        }
+
+        internal bool HasServer(string serverId)
+        {
+            return Servers.ContainsKey(serverId);
+        }
     }
 }

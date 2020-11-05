@@ -42,9 +42,9 @@ namespace GIGAClient
 
                 while (true)
                 {
-                    Console.WriteLine("Insert a new command:");
+                    Console.Write("> ");
                     command = Console.ReadLine();
-                    Console.WriteLine($"Running command {command}");
+                    Console.WriteLine("...");
                     commands.Run(command);
                 }
 

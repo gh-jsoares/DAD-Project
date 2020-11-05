@@ -25,6 +25,11 @@ namespace GIGAServer.dto
             partition.ShowStatus();
         }
 
+        public GIGAObject Read(string name)
+        {
+            return partition.Read(name);
+        }
+
         internal List<GIGAPartitionObjectID> GetPartitionObjectIDList()
         {
             return partition.GetPartitionObjectIDList();
@@ -37,7 +42,7 @@ namespace GIGAServer.dto
 
         internal void Write(string name, string value)
         {
-            Console.WriteLine("name: {0}, value: {1}", name, value);
+            // TODO MISSING LOCK
             partition.Write(name, value);
         }
     }

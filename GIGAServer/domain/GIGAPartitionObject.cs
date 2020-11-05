@@ -33,6 +33,12 @@ namespace GIGAServer.domain
             }
         }
 
+        internal GIGAObject Read(string name)
+        {
+            // TODO LOCKED
+            return GetObject(name);
+        }
+
         internal bool HasServer(string serverId)
         {
             return Servers.ContainsKey(serverId);
@@ -40,16 +46,10 @@ namespace GIGAServer.domain
 
         public void Write(string name, string value)
         {
-            Console.WriteLine("name: {0}, value: {1}", name, value);
             if (objects.ContainsKey(name))
-            {
                 objects[name].Value = value;
-            }
             else
-            {
-                GIGAObject obj = new GIGAObject(this, name, value);
-                objects.Add(name, obj);
-            }
+                objects.Add(name, new GIGAObject(this, name, value));
         }
 
         internal List<GIGAPartitionObjectID> GetPartitionObjectIDList()

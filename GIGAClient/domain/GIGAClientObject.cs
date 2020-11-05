@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Transactions;
 using GIGAClient.Commands;
@@ -33,6 +34,19 @@ namespace GIGAClient.domain
             {
                 partition.ShowStatus();
             }
+        }
+
+        internal GIGAPartitionObject GetRandomPartitionForServer(string serverId)
+        {
+            List<GIGAPartitionObject> partitions = PartitionMap.Values.Where(p => p.HasServer(serverId)).ToList();
+            Random random = new Random();
+            return partitions.ElementAt(random.Next(partitions.Count));
+        }
+
+        internal GIGAPartitionObject GetRandomPartition()
+        {
+            Random random = new Random();
+            return PartitionMap.Values.ElementAt(random.Next(PartitionMap.Count));
         }
     }
 }

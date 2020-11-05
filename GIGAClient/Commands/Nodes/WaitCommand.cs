@@ -20,7 +20,7 @@ namespace GIGAClient.Scripts.Commands
         {
             // TODO VALIDATE INT
             int amount = int.Parse(Args[0]);
-            Thread.Sleep(amount);
+            service.wait(amount);
         }
     }
 }

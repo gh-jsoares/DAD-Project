@@ -27,6 +27,12 @@ namespace GIGAServer.services
             return true;
         }
 
+        internal GIGAObject Read(string partitionId, string objectId)
+        {
+            if (!partitions.ContainsKey(partitionId)) return null;
+            return partitions[partitionId].Read(objectId);
+        }
+
         internal void ShowStatus()
         {
             Console.WriteLine("Current Partitions:");
@@ -35,6 +41,7 @@ namespace GIGAServer.services
                 entry.Value.ShowStatus();
             }
         }
+
         internal List<GIGAPartitionObjectID> ListObjects(string serverId)
         {
             List<GIGAPartitionObjectID> result = new List<GIGAPartitionObjectID>();

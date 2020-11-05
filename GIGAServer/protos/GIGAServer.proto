@@ -13,11 +13,12 @@ service GIGAServerService {
 message ReadRequest {
 	string partition_id = 1;
 	string object_id = 2;
-	//string server_id = 3;
 }
 
 message ReadReply {
-	string value = 1;
+	string partition_id = 1;
+	string object_id = 2;
+	string value = 3;
 }
 
 /* Write Command */ 

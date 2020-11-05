@@ -1,4 +1,5 @@
-﻿using GIGAServerProto;
+﻿using GIGAServer.domain;
+using GIGAServerProto;
 using Grpc.Core;
 using System;
 using System.Linq;
@@ -19,11 +20,13 @@ namespace GIGAServer.grpc
 
         public override Task<ReadReply> Read(ReadRequest request, ServerCallContext context)
         {
-            //TODO: mudar o tipo de objectid de string para GIGAObject no GIGAServer.proto
-           // domain.GIGAObject obj = gigaServerService.Read(request.PartitionId, request.ObjectId);
-           // GigaPartitionObject partition = new GigaPartitionObject { Name = obj.Name, RepFactor = obj.} ;
-            return Task.FromResult(new ReadReply { Value = gigaServerService.Read(request.PartitionId, request.ObjectId)});
-                      
+            GIGAObject obj = gigaPartitionService.Read(request.PartitionId, request.ObjectId);
+            ReadReply reply = new ReadReply();
+
+            if (obj != null)
+                reply = new ReadReply { Value = obj.Value, ObjectId = obj.Name, PartitionId = obj.Partition.Name };
+
+            return Task.FromResult(reply);
         }
 
         public override Task<ListServerReply> ListServer(ListServerRequest request, ServerCallContext context)
