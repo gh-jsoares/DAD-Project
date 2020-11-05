@@ -24,7 +24,6 @@ namespace PuppetMaster.Scripts.Commands
             GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient client = new GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient(channel);
 
             GIGAPuppetMasterProto.FreezeServerReply reply = client.FreezeServerService(new GIGAPuppetMasterProto.FreezeServerRequest());
-
         }
     }
 }
