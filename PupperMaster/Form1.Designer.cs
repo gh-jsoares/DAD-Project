@@ -116,7 +116,6 @@
             this.Cursor = System.Windows.Forms.Cursors.Default;
             this.Name = "Form1";
             this.Text = "PuppetMaster";
-            this.TopMost = true;
             this.Shown += new System.EventHandler(this.FormShown);
             this.ResumeLayout(false);
             this.PerformLayout();

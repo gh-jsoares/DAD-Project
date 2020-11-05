@@ -2,6 +2,7 @@
 using Grpc.Net.Client;
 using System;
 using System.Collections.Generic;
+using System.Net.Mail;
 
 namespace GIGAServer.dto
 {
@@ -44,8 +45,23 @@ namespace GIGAServer.dto
 
         internal void Write(string name, string value)
         {
-            // TODO MISSING LOCK
-            partition.Write(name, value);
+            foreach (var partitionClient in partitionMap.Values)
+            {
+                partitionClient.LockObject(new GIGAPartitionProto.LockObjectRequest { ObjectId = name, PartitionId = partition.Name });
+            }
+
+            // Received all Acks
+            PerformWrite(name, value);
+
+            foreach (var partitionClient in partitionMap.Values)
+            {
+                partitionClient.WriteObject(new GIGAPartitionProto.WriteObjectRequest { Value = value, ObjectId = name, PartitionId = partition.Name });
+            }
+        }
+
+        internal void PerformWrite(string objectId, string value)
+        {
+            partition.Write(objectId, value);
         }
 
         internal bool IsMaster(GIGAServerObject server)

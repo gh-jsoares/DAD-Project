@@ -16,12 +16,14 @@ namespace GIGAServer.grpc
 
         public override Task<LockObjectReply> LockObject(LockObjectRequest request, ServerCallContext context)
         {
-            return base.LockObject(request, context);
+            gigaPartitionService.LockWrite();
+            return Task.FromResult(new LockObjectReply { Ok = true } );
         }
 
         public override Task<WriteObjectReply> WriteObject(WriteObjectRequest request, ServerCallContext context)
         {
-            return base.WriteObject(request, context);
+            gigaPartitionService.PerformWrite(request.PartitionId, request.ObjectId, request.Value);
+            return Task.FromResult(new WriteObjectReply { Ok = true }) ;
         }
     }
 }

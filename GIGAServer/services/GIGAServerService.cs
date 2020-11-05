@@ -14,32 +14,35 @@ namespace GIGAServer.services
         public GIGAServerObject Server { get; }
         public int ReplicationFactor { get; set; }
         public bool Frozen { get; private set; } = false;
-        private int minDelay;
-        private int maxDelay;
+        public int MinDelay { get; }
+        public int MaxDelay { get; }
 
-        public Queue<string> FreezeQueue { get; }
-        public string PoppedQueue { get; private set; } = "";
-        public ManualResetEvent QueuePopEvent { get; } = new ManualResetEvent(false);
+        public Queue<string> FreezeQueue { get; } = new Queue<string>();
+        public string FreezePoppedQueue { get; private set; } = "";
+        public ManualResetEvent FreezeQueuePopEvent { get; } = new ManualResetEvent(false);
+
+        public Queue<string> WriteQueue { get; } = new Queue<string>();
+        public string WritePoppedQueue { get; private set; } = "";
+        public ManualResetEvent WriteQueuePopEvent { get; } = new ManualResetEvent(false);
 
         public GIGAServerService(string id, string hostname, int port, int minDelay, int maxDelay)
         {
-            this.minDelay = minDelay;
-            this.maxDelay = maxDelay;
+            MinDelay = minDelay;
+            MaxDelay = maxDelay;
             Server = new GIGAServerObject(id, string.Format("http://{0}:{1}", hostname, port));
-            FreezeQueue = new Queue<string>();
         }
         
         public bool Unfreeze()
         {
             Frozen = false;
-            PopQueue();
+            PopFreezeQueue();
             return true;
         }
 
         public bool Freeze()
         {
             Frozen = true;
-            QueuePopEvent.Reset();
+            FreezeQueuePopEvent.Reset();
             return true;
         }
 
@@ -55,11 +58,18 @@ namespace GIGAServer.services
             return true;
         }
 
-        internal void PopQueue()
+        internal void PopFreezeQueue()
         {
             if (FreezeQueue.Count == 0) return;
-            PoppedQueue = FreezeQueue.Dequeue();
-            QueuePopEvent.Set();
+            FreezePoppedQueue = FreezeQueue.Dequeue();
+            FreezeQueuePopEvent.Set();
+        }
+
+        internal void PopWriteQueue()
+        {
+            if (WriteQueue.Count == 0) return;
+            WritePoppedQueue = WriteQueue.Dequeue();
+            WriteQueuePopEvent.Set();
         }
     }
 }
