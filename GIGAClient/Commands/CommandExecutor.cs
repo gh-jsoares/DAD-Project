@@ -20,14 +20,14 @@ namespace GIGAClient.Commands
         {
             this.commands = new HashSet<ICommand>();
  
+            commands.Add(new ListGlobalCommand());
             commands.Add(new ReadCommand());
             commands.Add(new WriteCommand());
             commands.Add(new ListServerCommand());
-            commands.Add(new ListGlobalCommand());
             commands.Add(new WaitCommand());
             commands.Add(new BeginRepeatCommand());
             commands.Add(new EndRepeatCommand());
-            
+
             this.gigaClientService = gigaClientService;
          
         }
@@ -63,6 +63,7 @@ namespace GIGAClient.Commands
             catch (Exception e)
             {
                 Console.Error.WriteLine(e.Message);
+                Console.Error.WriteLine(e.StackTrace);
             }
         }
     }

@@ -6,3 +6,7 @@ Server s2 http://localhost:3001 100 300
 Server s3 http://localhost:3002 100 200	
 Client mary http://localhost:4000 sample_client_script1
 Status
+Wait 2000
+Freeze s1
+Unfreeze s1
+Crash s2

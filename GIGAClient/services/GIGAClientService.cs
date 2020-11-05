@@ -51,10 +51,23 @@ namespace GIGAClient.services
 
         public void listServer(string serverId)
         {
-            string url = gigaClientObject.ServerMap[serverId];
-            GrpcChannel channel = GrpcChannel.ForAddress(url);
+            GIGAServerObject server = null;
+            // TODO CHANGE TO SERVER MAP
+            foreach (GIGAPartitionObject partition in gigaClientObject.PartitionMap.Values)
+            {
+                if (partition.Servers.ContainsKey(serverId))
+                {
+                    server = partition.Servers[serverId];
+                    break;
+                }
+            }
+
+            if (server == null)
+                throw new Exception(string.Format("Server with id: \"{0}\" not found in storage", serverId));
+
+            GrpcChannel channel = GrpcChannel.ForAddress(server.Url);
             GIGAServerService.GIGAServerServiceClient client = new GIGAServerService.GIGAServerServiceClient(channel);
-            client.ListServer(new ListServerRequest { ServerId = serverId });
+            client.ListServer(new ListServerRequest { ServerId = server.Name });
         }
 
         internal bool ShowStatus()
@@ -65,7 +78,15 @@ namespace GIGAClient.services
 
         public void listGlobal()
         {
-            throw new NotImplementedException();
+            GIGAServerObject server = gigaClientObject.PartitionMap.Values.First().Servers.Values.First();
+            GrpcChannel channel = GrpcChannel.ForAddress(server.Url);
+            GIGAServerService.GIGAServerServiceClient client = new GIGAServerService.GIGAServerServiceClient(channel);
+            ListGlobalReply reply = client.ListGlobal(new ListGlobalRequest());
+            Console.WriteLine("List of entries: Partition => Object");
+            foreach (var item in reply.Objects)
+            {
+                Console.WriteLine("{0} => {1} | Is Master: {2}", item.PartitionId, item.ObjectId, item.IsMaster);
+            }
         }
 
         public void wait(int time)

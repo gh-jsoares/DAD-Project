@@ -9,7 +9,7 @@ namespace GIGAServer.domain
     class GIGAPartitionObject
     {
         public string Name { get; }
-        private Dictionary<string, GIGAServerObject> servers;
+        public Dictionary<string, GIGAServerObject> Servers { get; }
         public int ReplicationFactor { get; }
         public GIGAServerObject MasterServer { get; }
         private Dictionary<string, GIGAObject> objects;
@@ -19,18 +19,42 @@ namespace GIGAServer.domain
             Name = name ?? throw new ArgumentNullException(nameof(name));
             ReplicationFactor = replicationFactor;
             if (servers == null) throw new ArgumentNullException(nameof(servers));
-            this.servers = servers.ToDictionary(server => server.Name, server => server);
-            this.objects = new Dictionary<string, GIGAObject>();
-            this.MasterServer = servers.First();
+            Servers = servers.ToDictionary(server => server.Name, server => server);
+            objects = new Dictionary<string, GIGAObject>();
+            MasterServer = servers.First();
         }
 
         internal void ShowStatus()
         {
             Console.WriteLine("\tPartition \"{0}\":\n\t\tCurrent Master: {1}", Name, MasterServer.ToString());
-            foreach (KeyValuePair<string, GIGAServerObject> entry in servers)
+            foreach (KeyValuePair<string, GIGAServerObject> entry in Servers)
             {
                 Console.WriteLine("\t\t{0}", entry.Value.ToString());
             }
+        }
+
+        internal bool HasServer(string serverId)
+        {
+            return Servers.ContainsKey(serverId);
+        }
+
+        public void Write(string name, string value)
+        {
+            Console.WriteLine("name: {0}, value: {1}", name, value);
+            if (objects.ContainsKey(name))
+            {
+                objects[name].Value = value;
+            }
+            else
+            {
+                GIGAObject obj = new GIGAObject(this, name, value);
+                objects.Add(name, obj);
+            }
+        }
+
+        internal List<GIGAPartitionObjectID> GetPartitionObjectIDList()
+        {
+            return objects.Values.Select(obj => obj.ToPartitionObjectID()).ToList();
         }
 
         public GIGAObject GetObject(string name)

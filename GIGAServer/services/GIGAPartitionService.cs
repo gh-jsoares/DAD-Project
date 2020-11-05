@@ -2,6 +2,7 @@
 using GIGAServer.dto;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GIGAServer.services
 {
@@ -10,6 +11,12 @@ namespace GIGAServer.services
         private Dictionary<string, GIGAPartition> partitions = new Dictionary<string, GIGAPartition>();
         public int ReplicationFactor { get; set; }
 
+        private GIGAServerService gigaServerService;
+
+        public GIGAPartitionService(GIGAServerService gigaServerService)
+        {
+            this.gigaServerService = gigaServerService;
+        }
 
         public bool RegisterPartition(string id, int replicationFactor, GIGAServerObject[] servers)
         {
@@ -28,5 +35,31 @@ namespace GIGAServer.services
                 entry.Value.ShowStatus();
             }
         }
+        internal List<GIGAPartitionObjectID> ListObjects(string serverId)
+        {
+            List<GIGAPartitionObjectID> result = new List<GIGAPartitionObjectID>();
+
+            foreach (GIGAPartition partition in partitions.Values.Where(p => p.HasServer(serverId)))
+            {
+                partition.Write("obj-1", "value-1");
+                Console.WriteLine("ADDED");
+                result.AddRange(partition.GetPartitionObjectIDList());
+            }
+
+            return result;
+        }
+
+        internal List<GIGAPartitionObjectID> ListGlobal()
+        {
+            List<GIGAPartitionObjectID> result = new List<GIGAPartitionObjectID>();
+
+            foreach (GIGAPartition partition in partitions.Values)
+            {
+                result.AddRange(partition.GetPartitionObjectIDList());
+            }
+
+            return result;
+        }
+
     }
 }

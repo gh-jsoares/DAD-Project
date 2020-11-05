@@ -3,32 +3,25 @@
 package GIGAServerProto;
 
 service GIGAServerService {
-	rpc Test (TestRequest) returns (TestReply);
 	rpc Read (ReadRequest) returns (ReadReply);
 	rpc Write (WriteRequest) returns (WriteReply);
 	rpc ListServer (ListServerRequest) returns (ListServerReply);
+	rpc ListGlobal (ListGlobalRequest) returns (ListGlobalReply);
 }
 
-message TestRequest {
-	string id = 1;
-}
-
-message TestReply {
-	string id = 1;
-}
-
-message ReadRequest{
+/* Read Command */ 
+message ReadRequest {
 	string partition_id = 1;
 	string object_id = 2;
 	//string server_id = 3;
 }
 
-message ReadReply{
+message ReadReply {
 	string value = 1;
 }
 
 /* Write Command */ 
-message WriteRequest{
+message WriteRequest {
 	string partition_id = 1;
 	string object_id = 2;
 	string value = 3;
@@ -38,28 +31,25 @@ message WriteReply{
 	bool ok = 1;
 }
 
-message GigaObject{
-	GigaPartitionObject partitionObject = 1;
-	string name = 2;
-	string value = 3;
-	bool locked = 4;
+/* List Global Command */ 
+message ListGlobalRequest {
 }
 
-message GigaPartitionObject{
-	string name = 1;
-	int32 rep_factor = 2;
-	GigaServerObject serverObject = 3;
+message ListGlobalReply {
+	repeated PartitionObjectID objects = 1;
 }
 
-message GigaServerObject{
-	string name = 1;
-	string url = 2;
+message PartitionObjectID {
+	string partition_id = 1;
+	string object_id = 2;
+	bool is_master = 3;
 }
 
 /* List Server Command */
-message ListServerRequest{
+message ListServerRequest {
 	string server_id = 1;
 }
-message ListServerReply{
-	repeated string objectList = 1;
+
+message ListServerReply {
+	repeated PartitionObjectID objects = 1;
 }

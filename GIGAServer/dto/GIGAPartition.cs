@@ -24,5 +24,21 @@ namespace GIGAServer.dto
         {
             partition.ShowStatus();
         }
+
+        internal List<GIGAPartitionObjectID> GetPartitionObjectIDList()
+        {
+            return partition.GetPartitionObjectIDList();
+        }
+
+        internal bool HasServer(string serverId)
+        {
+            return partition.HasServer(serverId);
+        }
+
+        internal void Write(string name, string value)
+        {
+            Console.WriteLine("name: {0}, value: {1}", name, value);
+            partition.Write(name, value);
+        }
     }
 }

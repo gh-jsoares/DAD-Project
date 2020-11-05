@@ -71,7 +71,7 @@ namespace PuppetMaster
                     SendPartition(entry.Value, partition);
                 }
 
-                foreach (var entry in partition.Servers.Values)
+                foreach (var entry in ServerMap.Values)
                 {
                     SendPartition(entry.Url, partition);
                 }
@@ -90,7 +90,7 @@ namespace PuppetMaster
 
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
-            foreach (GIGAPartitionObject partition in PartitionMap.Values.Where(p => p.Servers.ContainsKey(serverObject.Name)))
+            foreach (GIGAPartitionObject partition in PartitionMap.Values)
             {
                 SendPartition(serverObject.Url, partition);
             }

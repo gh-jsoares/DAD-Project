@@ -31,13 +31,13 @@ namespace GIGAServer
             serverPort = new ServerPort(hostname, port, ServerCredentials.Insecure);
 
             services.GIGAServerService gigaServerService = new services.GIGAServerService(id, hostname, port, minDelay, maxDelay);
-            services.GIGAPartitionService gigaPartitionService = new services.GIGAPartitionService();
+            services.GIGAPartitionService gigaPartitionService = new services.GIGAPartitionService(gigaServerService);
             services.GIGAPuppetMasterService gigaPuppetMasterService = new services.GIGAPuppetMasterService(gigaServerService, gigaPartitionService);
 
             Server server = new Server
             {
                 Services = {
-                    GIGAServerProto.GIGAServerService.BindService(new grpc.GIGAServerService(gigaServerService)),
+                    GIGAServerProto.GIGAServerService.BindService(new grpc.GIGAServerService(gigaServerService, gigaPartitionService)),
                     GIGAPuppetMasterProto.GIGAPuppetMasterService.BindService(new grpc.GIGAPuppetMasterService(gigaPuppetMasterService)),
                     GIGAPartitionProto.GIGAPartitionService.BindService(new grpc.GIGAPartitionService(gigaPartitionService))
                 },

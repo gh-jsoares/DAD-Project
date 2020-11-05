@@ -12,9 +12,9 @@ namespace GIGAClient
 
         static void Main(string[] args)
         {
-            
+            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
-        //When client is initiated with a PuppetMaster command
+            //When client is initiated with a PuppetMaster command
             if (args.Length == 3)
             {
                 string name = args[0];
@@ -27,9 +27,6 @@ namespace GIGAClient
                 services.GIGAPuppetMasterService gigaPuppetMasterService = new services.GIGAPuppetMasterService(gigaClientService);
                 commands = new CommandExecutor(gigaClientService);
 
-         
-                
-
                 Uri uri = new Uri(url);
 
                 Server server = new Server
@@ -41,21 +38,15 @@ namespace GIGAClient
                 server.Start();
                 Console.WriteLine("Client \"Puppet Master Server\" listening on url {0}", uri.AbsoluteUri);
 
-
                 string command;
 
                 while (true)
                 {
                     Console.WriteLine("Insert a new command:");
-
                     command = Console.ReadLine();
-
                     Console.WriteLine($"Running command {command}");
-
                     commands.Run(command);
                 }
-
-
 
             }
 
