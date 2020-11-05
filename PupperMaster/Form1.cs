@@ -38,7 +38,7 @@ namespace PuppetMaster
 
         private void btnSendCommand_Click(object sender, EventArgs e)
         {
-            tbCommandLog.Text += pml.SendCommand(tbCommand.Text) + "\r\n";
+            tbCommandLog.AppendText(pml.SendCommand(tbCommand.Text) + "\r\n");
 
         }
 
@@ -48,7 +48,7 @@ namespace PuppetMaster
 
             foreach(string c in commands)
             {
-                tbCommandLog.Text += pml.SendCommand(c) + "\r\n";
+                tbCommandLog.AppendText(pml.SendCommand(c) + "\r\n");
             }
         }
 
@@ -72,7 +72,7 @@ namespace PuppetMaster
 
             string command = commandsList.Dequeue();
 
-            tbCommandLog.Text += pml.SendCommand(command) + "\r\n";
+            tbCommandLog.AppendText(pml.SendCommand(command) + "\r\n");
 
             if(commandsList.Count == 0)
             {
