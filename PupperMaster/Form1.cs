@@ -18,18 +18,12 @@ namespace PuppetMaster
 
         Queue<string> commandsList = new Queue<string>();
 
-        public Form1(ConfigReader cr)
+        public Form1()
         {
             InitializeComponent();
 
             pml = new PuppetMasterLogic();
-            if(cr != null)
-            {
-                foreach (string c in cr.InitialSetup)
-                {
-                    commandsList.Enqueue(c);
-                }
-            }
+
         }
 
         private void FormShown(object sender, EventArgs e)
