@@ -1,8 +1,11 @@
-﻿using Grpc.Net.Client;
+﻿using GIGAPuppetMaster.domain;
+using Grpc.Core;
+using Grpc.Net.Client;
 using PuppetMaster.Commands;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace PuppetMaster.Scripts.Commands
@@ -19,36 +22,16 @@ namespace PuppetMaster.Scripts.Commands
 
         void ICommand.SafeExecute(string[] Args, PuppetMasterLogic PuppetMaster)
         {
-            Console.WriteLine(Args.Length);
+            string name = Args[1];
+            int replicationFactor = int.Parse(Args[0]);
+            List<string> serverList = new List<string>(Args);
+            serverList.RemoveRange(0, 2);
 
-            ArrayList arrayServer = new ArrayList();
+            GIGAServerObject[] currentServers = PuppetMaster.ServerMap.Values.Where(server => serverList.Contains(server.Name)).ToArray();
 
-            for(int i = 2; i < Args.Length; i++)
-            {
-                arrayServer.Add(Args[i]);
+            GIGAPartitionObject partitionObject = new GIGAPartitionObject(name, replicationFactor, serverList.ToArray(), currentServers);
 
-            }
-
-            //PuppetMaster.PartitionMap.Add(Args[1], (string[])arrayServer.ToArray(typeof(string)));
-
-
-            ////Send Partitions to every client
-            //AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-
-            //foreach (KeyValuePair<string, string> entry in PuppetMaster.ClientMap)
-            //{
-
-            //    GrpcChannel channel = GrpcChannel.ForAddress(entry.Value);
-            //    GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient client = new GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient(channel);
-
-            //    GIGAPuppetMasterProto.PartitionReply reply = client.PartitionService(new GIGAPuppetMasterProto.PartitionRequest
-            //    {
-            //        Id = Args[1],
-            //        Servers =   string.Join(" ", (string[])arrayServer.ToArray(typeof(string))) 
-            //    });
-
-            //}
-
+            PuppetMaster.AddPartition(partitionObject);
         }
     }
 }

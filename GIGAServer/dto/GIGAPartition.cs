@@ -16,7 +16,7 @@ namespace GIGAServer.dto
             partition = new GIGAPartitionObject(name, replicationFactor, servers);
             foreach (GIGAServerObject server in servers)
             {
-                partitionMap.Add(name, new GIGAPartitionProto.GIGAPartitionService.GIGAPartitionServiceClient(GrpcChannel.ForAddress(server.Url)));
+                partitionMap.Add(server.Name, new GIGAPartitionProto.GIGAPartitionService.GIGAPartitionServiceClient(GrpcChannel.ForAddress(server.Url)));
             }
         }
 

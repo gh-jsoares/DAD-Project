@@ -21,17 +21,13 @@ namespace PuppetMaster.Scripts.Commands
             Console.WriteLine(Args.Length);
 
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-
-            foreach (KeyValuePair<string, string> entry in PuppetMaster.ClientMap)
+            foreach (var entry in PuppetMaster.ServerMap)
             {
-                
-                GrpcChannel channel = GrpcChannel.ForAddress(entry.Value);
+                var server = entry.Value;
+                GrpcChannel channel = GrpcChannel.ForAddress(server.Url);
                 GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient client = new GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient(channel);
 
-                GIGAPuppetMasterProto.StatusReply reply = client.StatusService(new GIGAPuppetMasterProto.StatusRequest
-                {
-
-                });
+                GIGAPuppetMasterProto.StatusReply reply = client.StatusService(new GIGAPuppetMasterProto.StatusRequest());
             }
         }
     }

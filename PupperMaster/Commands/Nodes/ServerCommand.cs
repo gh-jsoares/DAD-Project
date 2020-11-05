@@ -37,27 +37,9 @@ namespace PuppetMaster.Scripts.Commands
             startInfo.WindowStyle = ProcessWindowStyle.Normal;
             Process.Start(startInfo);
 
-            //Add server to PuppetMaster Dictionary
-            GIGAServerObject serverObject = new GIGAServerObject(Args[0], Args[1]);
-            PuppetMaster.ServerMap.Add(serverObject.Name, serverObject);
-
-            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-
-            foreach (KeyValuePair<string, GIGAPartitionObject> entry in PuppetMaster.PartitionMap)
-            {
-                GrpcChannel channel = GrpcChannel.ForAddress(string.Format("http://{0}:{1}", Args[0], Args[1]));
-                GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient client = new GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient(channel);
-                GIGAServerObject[] servers = entry.Value.Servers.Values.ToArray();
-
-                GIGAPuppetMasterProto.PartitionRequest request = new GIGAPuppetMasterProto.PartitionRequest
-                {
-                    PartitionId = entry.Value.Name,
-                    ReplicationFactor = entry.Value.ReplicationFactor,
-                };
-                request.Servers.AddRange(servers.Select(server => new GIGAPuppetMasterProto.ServerObject { Id = server.Name, Url = server.Url }));
-
-                client.PartitionService(request);
-            }
+            // TODO: validate args 2 and 3 are ints
+            GIGAServerObject serverObject = new GIGAServerObject(Args[0], Args[1], int.Parse(Args[2]), int.Parse(Args[3]));
+            PuppetMaster.AddServer(serverObject);
         }
     }
 }

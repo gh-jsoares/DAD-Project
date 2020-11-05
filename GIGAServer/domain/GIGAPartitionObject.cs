@@ -11,13 +11,7 @@ namespace GIGAServer.domain
         public string Name { get; }
         private Dictionary<string, GIGAServerObject> servers;
         public int ReplicationFactor { get; }
-        public GIGAServerObject MasterServer {
-            get
-            {
-                // if server is down, change server
-                return MasterServer;
-            }
-        }
+        public GIGAServerObject MasterServer { get; }
         private Dictionary<string, GIGAObject> objects;
 
         public GIGAPartitionObject(string name, int replicationFactor, GIGAServerObject[] servers)
@@ -27,6 +21,7 @@ namespace GIGAServer.domain
             if (servers == null) throw new ArgumentNullException(nameof(servers));
             this.servers = servers.ToDictionary(server => server.Name, server => server);
             this.objects = new Dictionary<string, GIGAObject>();
+            this.MasterServer = servers.First();
         }
 
         internal void ShowStatus()
