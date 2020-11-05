@@ -18,5 +18,14 @@ namespace GIGAClient.domain
             if (servers == null) throw new ArgumentNullException(nameof(servers));
             Servers = servers.ToDictionary(server => server.Name, server => server);
         }
+
+        internal void ShowStatus()
+        {
+            Console.WriteLine("\tPartition \"{0}\":", Name);
+            foreach (GIGAServerObject server in Servers.Values)
+            {
+                Console.WriteLine("\t\t{0}", server.ToString());
+            }
+        }
     }
 }

@@ -26,10 +26,10 @@ namespace GIGAServer.domain
 
         internal void ShowStatus()
         {
-            Console.WriteLine("Partition \"{0}\":\n\tCurrent Master: {1}", Name, MasterServer.ToString());
+            Console.WriteLine("\tPartition \"{0}\":\n\t\tCurrent Master: {1}", Name, MasterServer.ToString());
             foreach (KeyValuePair<string, GIGAServerObject> entry in servers)
             {
-                Console.WriteLine("\t{0}", entry.Value.ToString());
+                Console.WriteLine("\t\t{0}", entry.Value.ToString());
             }
         }
 

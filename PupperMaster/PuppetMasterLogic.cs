@@ -47,6 +47,18 @@ namespace PuppetMaster
             }
         }
 
+        internal void AddClient(string username, string url)
+        {
+            ClientMap.Add(username, url);
+
+            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+
+            foreach (GIGAPartitionObject partition in PartitionMap.Values)
+            {
+                SendPartition(url, partition);
+            }
+        }
+
         internal void AddPartition(GIGAPartitionObject partition)
         {
             if(partition.CanSetup())

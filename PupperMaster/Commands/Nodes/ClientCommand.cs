@@ -33,23 +33,7 @@ namespace PuppetMaster.Scripts.Commands
             Process.Start(startInfo);
 
 
-            //Add client to PuppetMaster Dictionary
-            PuppetMaster.ClientMap.Add(Args[0], Args[1]);
-
-
-            //Send Partitions to client
-            GrpcChannel channel = GrpcChannel.ForAddress(Args[1]);
-            GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient client = new GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient(channel);
-
-            //foreach (KeyValuePair < string, string[]> entry in PuppetMaster.PartitionMap)
-            //{
-            //    //GIGAPuppetMasterProto.PartitionReply reply = client.PartitionService(new GIGAPuppetMasterProto.PartitionRequest
-            //    //{
-            //    //    Id = entry.Key,
-            //    //    Servers = string.Join(" ", entry.Value)  
-            //    //});
-            //}
-
+            PuppetMaster.AddClient(Args[0], Args[1]);
         }
     }
 }

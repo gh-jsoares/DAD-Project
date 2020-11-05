@@ -5,14 +5,13 @@ using Grpc.Core;
 using Grpc.Net.Client;
 using System;
 using System.Collections.Generic;
-
+using System.Linq;
 
 namespace GIGAClient.services
 {
     class GIGAClientService
     {
         private GIGAClientObject gigaClientObject;
-
 
         public GIGAClientService(string name, string url, string file)
         {
@@ -31,10 +30,19 @@ namespace GIGAClient.services
             }
         }
 
+        internal bool RegisterPartition(string partitionName, int replicationFactor, GIGAServerObject[] servers)
+        {
+            if (gigaClientObject.PartitionMap.ContainsKey(partitionName)) return false;
+
+            gigaClientObject.PartitionMap.Add(partitionName, new GIGAPartitionObject(partitionName, replicationFactor, servers));
+
+            return true;
+        }
+
         public void write(string partitionId, string objectId, String value)
         {
             //TODO: locking mechanism
-            string server_id = gigaClientObject.PartitionMap[partitionId][0];
+            string server_id = gigaClientObject.PartitionMap[partitionId].Servers.Values.First().Name;
             string url = gigaClientObject.ServerMap[server_id];
             GrpcChannel channel = GrpcChannel.ForAddress(url);
             GIGAServerService.GIGAServerServiceClient client = new GIGAServerService.GIGAServerServiceClient(channel);
@@ -51,7 +59,8 @@ namespace GIGAClient.services
 
         internal bool ShowStatus()
         {
-            throw new NotImplementedException();
+            gigaClientObject.ShowStatus();
+            return true;
         }
 
         public void listGlobal()

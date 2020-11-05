@@ -10,8 +10,8 @@ namespace GIGAClient.domain
 {
     class GIGAClientObject
     {
-        public Dictionary<string, string> ServerMap { get; set; } = new Dictionary<string, string>();
-        public Dictionary<string, string[]> PartitionMap { get; set; } = new Dictionary<string, string[]>();
+        public Dictionary<string, string> ServerMap { get; } = new Dictionary<string, string>();
+        public Dictionary<string, GIGAPartitionObject> PartitionMap { get; } = new Dictionary<string, GIGAPartitionObject>();
         public string Username { get; }
         public string Url { get; }
         public string File { get; }
@@ -25,9 +25,14 @@ namespace GIGAClient.domain
             AttachedServer = null;
         }
 
-
-
-
-
+        internal void ShowStatus()
+        {
+            Console.WriteLine("Client: \"{0}\" @ {1}", Username, Url);
+            Console.WriteLine("Current Partitions:");
+            foreach (GIGAPartitionObject partition in PartitionMap.Values)
+            {
+                partition.ShowStatus();
+            }
+        }
     }
 }

@@ -9,7 +9,6 @@ namespace GIGAClient.services
     {
         private GIGAClientService gigaClientService;
 
-
         public GIGAPuppetMasterService(GIGAClientService GIGAClientService)
         {
             this.gigaClientService = GIGAClientService;
@@ -17,7 +16,7 @@ namespace GIGAClient.services
 
         public bool Partition(int replicationFactor, string partitionName, GIGAServerObject[] servers)
         {
-            throw new NotImplementedException();
+            return gigaClientService.RegisterPartition(partitionName, replicationFactor, servers);
         }
 
         public bool Status()

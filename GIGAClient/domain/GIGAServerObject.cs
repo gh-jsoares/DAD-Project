@@ -12,5 +12,10 @@ namespace GIGAClient.domain
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Url = url ?? throw new ArgumentNullException(nameof(url));
         }
+
+        public override string ToString()
+        {
+            return string.Format("\"{0}\" @ {1}", Name, Url);
+        }
     }
 }
