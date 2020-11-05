@@ -1,4 +1,5 @@
-﻿using PuppetMaster.Commands;
+﻿using Grpc.Net.Client;
+using PuppetMaster.Commands;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,7 +18,12 @@ namespace PuppetMaster.Scripts.Commands
 
         void ICommand.SafeExecute(string[] Args, PuppetMasterLogic PuppetMaster)
         {
-            Console.WriteLine(Args.Length);
+            string url = PuppetMaster.ServerMap[Args[0]].Url;
+
+            GrpcChannel channel = GrpcChannel.ForAddress(url);
+            GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient client = new GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient(channel);
+
+            GIGAPuppetMasterProto.FreezeServerReply reply = client.FreezeServerService(new GIGAPuppetMasterProto.FreezeServerRequest());
 
         }
     }
