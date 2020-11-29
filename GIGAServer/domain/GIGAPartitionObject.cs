@@ -12,6 +12,8 @@ namespace GIGAServer.domain
         public Dictionary<string, GIGAServerObject> Servers { get; }
         public int ReplicationFactor { get; }
         public GIGAServerObject MasterServer { get; }
+        internal GIGARaftObject RaftObject { get; set; }
+
         private Dictionary<string, GIGAObject> objects;
 
         public GIGAPartitionObject(string name, int replicationFactor, GIGAServerObject[] servers)
@@ -21,7 +23,7 @@ namespace GIGAServer.domain
             if (servers == null) throw new ArgumentNullException(nameof(servers));
             Servers = servers.ToDictionary(server => server.Name, server => server);
             objects = new Dictionary<string, GIGAObject>();
-            MasterServer = servers.First();
+            MasterServer = servers.First();    
         }
 
         internal void ShowStatus()
@@ -70,6 +72,13 @@ namespace GIGAServer.domain
         public void AddObject(string name, GIGAObject value)
         {
             objects.Add(name, value);
+        }
+
+
+        //Raft
+        public void CreateRaftObject()
+        {
+            this.RaftObject = new GIGARaftObject();
         }
     }
 }

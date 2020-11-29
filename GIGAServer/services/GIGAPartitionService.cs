@@ -10,15 +10,18 @@ namespace GIGAServer.services
 {
     class GIGAPartitionService
     {
-        private Dictionary<string, GIGAPartition> partitions = new Dictionary<string, GIGAPartition>();
         public int ReplicationFactor { get; set; }
+        internal Dictionary<string, GIGAPartition> Partitions { get; set; } = new Dictionary<string, GIGAPartition>();
 
         private GIGAServerService gigaServerService;
 
         public GIGAPartitionService(GIGAServerService gigaServerService)
         {
             this.gigaServerService = gigaServerService;
+
+         
         }
+
 
         public void CheckFrozenServer()
         {
@@ -50,7 +53,7 @@ namespace GIGAServer.services
 
         internal void PerformWrite(string partitionId, string objectId, string value)
         {
-            partitions[partitionId].PerformWrite(objectId, value);
+            Partitions[partitionId].PerformWrite(objectId, value);
             gigaServerService.PopWriteQueue();
         }
 
@@ -75,9 +78,9 @@ namespace GIGAServer.services
         public bool RegisterPartition(string id, int replicationFactor, GIGAServerObject[] servers)
         {
             Console.WriteLine("REGISTER PARTITION");
-            if (partitions.ContainsKey(id)) return false;
+            if (Partitions.ContainsKey(id)) return false;
 
-            partitions.Add(id, new GIGAPartition(id, replicationFactor, servers));
+            Partitions.Add(id, new GIGAPartition(id, replicationFactor, servers));
 
             return true;
         }
@@ -88,8 +91,8 @@ namespace GIGAServer.services
             CheckWriteServer();
 
             Console.WriteLine("READ");
-            if (!partitions.ContainsKey(partitionId)) return null;
-            GIGAObject obj = partitions[partitionId].Read(objectId);
+            if (!Partitions.ContainsKey(partitionId)) return null;
+            GIGAObject obj = Partitions[partitionId].Read(objectId);
 
             gigaServerService.PopWriteQueue();
             gigaServerService.PopFreezeQueue();
@@ -100,7 +103,7 @@ namespace GIGAServer.services
         internal void ShowStatus()
         {
             Console.WriteLine("Current Partitions:");
-            foreach (KeyValuePair<string, GIGAPartition> entry in partitions)
+            foreach (KeyValuePair<string, GIGAPartition> entry in Partitions)
             {
                 entry.Value.ShowStatus();
             }
@@ -115,7 +118,7 @@ namespace GIGAServer.services
 
             List<GIGAPartitionObjectID> result = new List<GIGAPartitionObjectID>();
 
-            foreach (GIGAPartition partition in partitions.Values.Where(p => p.HasServer(serverId)))
+            foreach (GIGAPartition partition in Partitions.Values.Where(p => p.HasServer(serverId)))
             {
                 result.AddRange(partition.GetPartitionObjectIDList());
             }
@@ -133,7 +136,7 @@ namespace GIGAServer.services
             
             Console.WriteLine("WRITE");
 
-            GIGAPartition partition = partitions[partitionId];
+            GIGAPartition partition = Partitions[partitionId];
             if (!partition.IsMaster(gigaServerService.Server))
             {
                 return new KeyValuePair<bool, string>(false, partition.Master.Name);
@@ -154,7 +157,7 @@ namespace GIGAServer.services
             Console.WriteLine("LIST GLOBAL");
             List<GIGAPartitionObjectID> result = new List<GIGAPartitionObjectID>();
 
-            foreach (GIGAPartition partition in partitions.Values)
+            foreach (GIGAPartition partition in Partitions.Values)
             {
                 result.AddRange(partition.GetPartitionObjectIDList());
             }

@@ -1,6 +1,8 @@
 ﻿using GIGAPartitionProto;
 using GIGAServerProto;
 using Grpc.Core;
+using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace GIGAServer.grpc
@@ -25,5 +27,17 @@ namespace GIGAServer.grpc
             gigaPartitionService.PerformWrite(request.PartitionId, request.ObjectId, request.Value);
             return Task.FromResult(new WriteObjectReply { Ok = true }) ;
         }
+
+        public override Task<VoteReply> Vote(VoteRequest request, ServerCallContext context)
+        {
+            Console.WriteLine($"Received vote for partition {request.PartitionId} from server {request.ServerId}");
+
+            Random r = new Random();
+
+            Thread.Sleep(r.Next(0, 10000));
+
+            return Task.FromResult(new VoteReply { VoteForCandidate = true });
+        }
     }
 }
+

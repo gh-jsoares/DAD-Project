@@ -5,6 +5,7 @@ package GIGAPartitionProto;
 service GIGAPartitionService {
 	rpc LockObject (LockObjectRequest) returns (LockObjectReply);
 	rpc WriteObject (WriteObjectRequest) returns (WriteObjectReply);
+	rpc Vote (VoteRequest) returns (VoteReply);
 }
 
 /* Lock Message */
@@ -28,3 +29,13 @@ message WriteObjectReply {
 	bool ok = 1;
 }
 
+/*RAFT Messages*/
+message VoteRequest{
+	string partition_id = 1;
+	string server_id = 2;
+}
+
+message VoteReply{
+	bool voteForCandidate = 1;
+	string partition_id = 2;
+}

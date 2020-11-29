@@ -33,6 +33,7 @@ namespace GIGAServer
             services.GIGAServerService gigaServerService = new services.GIGAServerService(id, hostname, port, minDelay, maxDelay);
             services.GIGAPartitionService gigaPartitionService = new services.GIGAPartitionService(gigaServerService);
             services.GIGAPuppetMasterService gigaPuppetMasterService = new services.GIGAPuppetMasterService(gigaServerService, gigaPartitionService);
+            
 
             Server server = new Server
             {
@@ -50,6 +51,9 @@ namespace GIGAServer
             Console.WriteLine("Insecure GIGAStore server listening on port " + port);
             //Configuring HTTP for client connections in Register method
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+
+            //Start Raft after everything is setup
+            services.GIGARaftService gigaRaftService = new services.GIGARaftService(gigaPartitionService, gigaServerService);
 
             while (true) ; // doesnt exit
         }
