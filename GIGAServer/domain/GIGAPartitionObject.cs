@@ -78,7 +78,7 @@ namespace GIGAServer.domain
         //Raft
         public void CreateRaftObject()
         {
-            this.RaftObject = new GIGARaftObject();
+            this.RaftObject = new GIGARaftObject(Servers);
         }
     }
 }

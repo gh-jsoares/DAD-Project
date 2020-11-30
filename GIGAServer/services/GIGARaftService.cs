@@ -41,6 +41,8 @@ namespace GIGAServer.services
         {
             Console.WriteLine($"Thread for partition {partition.Partition.Name} started");
 
+            //Reset everything
+            partition.Partition.RaftObject.ResetVotes();
 
             Thread.Sleep(partition.Partition.RaftObject.Timeout);
 
@@ -51,17 +53,20 @@ namespace GIGAServer.services
         {
             partition.Partition.RaftObject.State = 2; //Turn into candidate
 
-            partition.Partition.RaftObject.Votes++; //Vote for self
+            partition.Partition.RaftObject.Votes[gigaServerService.Server.Name] = 1;  //Vote for self
 
             Console.WriteLine("START ELECTION");
 
-            foreach (var partitionClient in partition.PartitionMap.Values)
+            foreach (var partitionClient in partition.PartitionMap)
             {
 
-                Console.WriteLine($"Sent vote for partition {partition.Partition.Name}");
+                if(partitionClient.Key != gigaServerService.Server.Name)
+                {
+                    Console.WriteLine($"Sent vote for partition {partition.Partition.Name}");
 
-                Thread initState = new Thread(() => partition.SendVoteRequest(gigaServerService.Server.Name, partitionClient));
-                initState.Start();
+                    Thread sendVoteThread = new Thread(() => partition.SendVoteRequest(gigaServerService.Server.Name, partitionClient.Value));
+                    sendVoteThread.Start();
+                }
 
             }
 

@@ -38,4 +38,5 @@ message VoteRequest{
 message VoteReply{
 	bool voteForCandidate = 1;
 	string partition_id = 2;
+	string server_id = 3;
 }

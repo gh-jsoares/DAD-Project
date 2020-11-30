@@ -78,14 +78,15 @@ namespace GIGAServer.dto
         {
             Partition.CreateRaftObject();
         }
-        internal bool SendVoteRequest(string server_id, GIGAPartitionProto.GIGAPartitionService.GIGAPartitionServiceClient partitionClient)
+
+        internal void SendVoteRequest(string server_id, GIGAPartitionProto.GIGAPartitionService.GIGAPartitionServiceClient partitionClient)
         {
 
-            GIGAPartitionProto.VoteReply vote = partitionClient.Vote(new GIGAPartitionProto.VoteRequest { PartitionId = Partition.Name, ServerId = server_id });
+            GIGAPartitionProto.VoteReply reply = partitionClient.Vote(new GIGAPartitionProto.VoteRequest { PartitionId = Partition.Name, ServerId = server_id });
 
-            Console.WriteLine($"Received {vote}");
+            Console.WriteLine($"Received {reply}");
 
-            return true;
+            Partition.RaftObject.HandleVoteReply(reply);
         }
 
     }

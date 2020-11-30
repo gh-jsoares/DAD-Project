@@ -32,11 +32,9 @@ namespace GIGAServer.grpc
         {
             Console.WriteLine($"Received vote for partition {request.PartitionId} from server {request.ServerId}");
 
-            Random r = new Random();
+            Console.WriteLine($"{gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.VoteReplyDecision()}");
 
-            Thread.Sleep(r.Next(0, 10000));
-
-            return Task.FromResult(new VoteReply { VoteForCandidate = true });
+            return Task.FromResult(new VoteReply { VoteForCandidate = gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.VoteReplyDecision(), ServerId = gigaPartitionService.GigaServerService.Server.Name});
         }
     }
 }

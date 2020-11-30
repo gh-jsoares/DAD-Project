@@ -12,12 +12,11 @@ namespace GIGAServer.services
     {
         public int ReplicationFactor { get; set; }
         internal Dictionary<string, GIGAPartition> Partitions { get; set; } = new Dictionary<string, GIGAPartition>();
-
-        private GIGAServerService gigaServerService;
+        internal GIGAServerService GigaServerService { get; set; }
 
         public GIGAPartitionService(GIGAServerService gigaServerService)
         {
-            this.gigaServerService = gigaServerService;
+            this.GigaServerService = gigaServerService;
 
          
         }
@@ -28,51 +27,51 @@ namespace GIGAServer.services
             Random random = new Random();
 
             // ADD RANDOM DELAY BETWEEN MIN AND MAX
-            Thread.Sleep(random.Next(gigaServerService.MinDelay, gigaServerService.MaxDelay));
+            Thread.Sleep(random.Next(GigaServerService.MinDelay, GigaServerService.MaxDelay));
 
             Thread.CurrentThread.Name = string.Format("Thread {0}", Thread.CurrentThread.ManagedThreadId);
 
-            if (gigaServerService.FreezeQueue.Count > 0 || gigaServerService.Frozen)
-                gigaServerService.FreezeQueue.Enqueue(Thread.CurrentThread.Name);
+            if (GigaServerService.FreezeQueue.Count > 0 || GigaServerService.Frozen)
+                GigaServerService.FreezeQueue.Enqueue(Thread.CurrentThread.Name);
 
-            while(gigaServerService.FreezeQueue.Count > 0)
+            while(GigaServerService.FreezeQueue.Count > 0)
             {
-                gigaServerService.FreezeQueuePopEvent.WaitOne();
-                if (Thread.CurrentThread.Name == gigaServerService.FreezePoppedQueue) break;
+                GigaServerService.FreezeQueuePopEvent.WaitOne();
+                if (Thread.CurrentThread.Name == GigaServerService.FreezePoppedQueue) break;
                 Thread.Sleep(random.Next(100, 500));
             }
 
-            if (gigaServerService.FreezeQueue.Count > 0)
-                gigaServerService.FreezeQueuePopEvent.Reset();
+            if (GigaServerService.FreezeQueue.Count > 0)
+                GigaServerService.FreezeQueuePopEvent.Reset();
         }
 
         internal void LockWrite()
         {
-            gigaServerService.WriteQueue.Enqueue(Thread.CurrentThread.Name);
+            GigaServerService.WriteQueue.Enqueue(Thread.CurrentThread.Name);
         }
 
         internal void PerformWrite(string partitionId, string objectId, string value)
         {
             Partitions[partitionId].PerformWrite(objectId, value);
-            gigaServerService.PopWriteQueue();
+            GigaServerService.PopWriteQueue();
         }
 
         public void CheckWriteServer()
         {
             Random random = new Random();
 
-            if (gigaServerService.WriteQueue.Count > 0)
-                gigaServerService.WriteQueue.Enqueue(Thread.CurrentThread.Name);
+            if (GigaServerService.WriteQueue.Count > 0)
+                GigaServerService.WriteQueue.Enqueue(Thread.CurrentThread.Name);
 
-            while(gigaServerService.WriteQueue.Count > 0)
+            while(GigaServerService.WriteQueue.Count > 0)
             {
-                gigaServerService.WriteQueuePopEvent.WaitOne();
-                if (Thread.CurrentThread.Name == gigaServerService.WritePoppedQueue) break;
+                GigaServerService.WriteQueuePopEvent.WaitOne();
+                if (Thread.CurrentThread.Name == GigaServerService.WritePoppedQueue) break;
                 Thread.Sleep(random.Next(100, 500));
             }
 
-            if (gigaServerService.WriteQueue.Count > 0)
-                gigaServerService.WriteQueuePopEvent.Reset();
+            if (GigaServerService.WriteQueue.Count > 0)
+                GigaServerService.WriteQueuePopEvent.Reset();
         }
 
         public bool RegisterPartition(string id, int replicationFactor, GIGAServerObject[] servers)
@@ -94,8 +93,8 @@ namespace GIGAServer.services
             if (!Partitions.ContainsKey(partitionId)) return null;
             GIGAObject obj = Partitions[partitionId].Read(objectId);
 
-            gigaServerService.PopWriteQueue();
-            gigaServerService.PopFreezeQueue();
+            GigaServerService.PopWriteQueue();
+            GigaServerService.PopFreezeQueue();
 
             return obj;
         }
@@ -123,8 +122,8 @@ namespace GIGAServer.services
                 result.AddRange(partition.GetPartitionObjectIDList());
             }
 
-            gigaServerService.PopWriteQueue();
-            gigaServerService.PopFreezeQueue();
+            GigaServerService.PopWriteQueue();
+            GigaServerService.PopFreezeQueue();
 
             return result;
         }
@@ -137,14 +136,14 @@ namespace GIGAServer.services
             Console.WriteLine("WRITE");
 
             GIGAPartition partition = Partitions[partitionId];
-            if (!partition.IsMaster(gigaServerService.Server))
+            if (!partition.IsMaster(GigaServerService.Server))
             {
                 return new KeyValuePair<bool, string>(false, partition.Master.Name);
             }
             partition.Write(objectId, value);
 
-            gigaServerService.PopWriteQueue();
-            gigaServerService.PopFreezeQueue();
+            GigaServerService.PopWriteQueue();
+            GigaServerService.PopFreezeQueue();
 
             return new KeyValuePair<bool, string>(true, "");
         }
@@ -162,8 +161,8 @@ namespace GIGAServer.services
                 result.AddRange(partition.GetPartitionObjectIDList());
             }
 
-            gigaServerService.PopWriteQueue();
-            gigaServerService.PopFreezeQueue();
+            GigaServerService.PopWriteQueue();
+            GigaServerService.PopFreezeQueue();
 
             return result;
         }
