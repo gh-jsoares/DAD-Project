@@ -6,6 +6,7 @@ service GIGAPartitionService {
 	rpc LockObject (LockObjectRequest) returns (LockObjectReply);
 	rpc WriteObject (WriteObjectRequest) returns (WriteObjectReply);
 	rpc Vote (VoteRequest) returns (VoteReply);
+	rpc SendLeader (SendLeaderRequest) returns (SendLeaderReply);
 }
 
 /* Lock Message */
@@ -29,14 +30,29 @@ message WriteObjectReply {
 	bool ok = 1;
 }
 
-/*RAFT Messages*/
+/*------ RAFT Messages --------*/
+
+//Ask for votes
 message VoteRequest{
 	string partition_id = 1;
 	string server_id = 2;
+	int32 term = 3;
 }
 
 message VoteReply{
 	bool voteForCandidate = 1;
 	string partition_id = 2;
 	string server_id = 3;
+	int32 term = 4;
+}
+
+
+//Tell everyone you're the new leader
+message SendLeaderRequest{
+	string partition_id = 1;
+	string server_id = 2;
+}
+
+message SendLeaderReply{
+	bool ok = 1;
 }

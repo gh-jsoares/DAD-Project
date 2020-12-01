@@ -32,9 +32,19 @@ namespace GIGAServer.grpc
         {
             Console.WriteLine($"Received vote for partition {request.PartitionId} from server {request.ServerId}");
 
-            Console.WriteLine($"{gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.VoteReplyDecision()}");
+            Console.WriteLine($"{gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.VoteReplyDecision(request.Term)}");
 
-            return Task.FromResult(new VoteReply { VoteForCandidate = gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.VoteReplyDecision(), ServerId = gigaPartitionService.GigaServerService.Server.Name});
+            return Task.FromResult(new VoteReply { VoteForCandidate = gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.VoteReplyDecision(request.Term), ServerId = gigaPartitionService.GigaServerService.Server.Name});
+        }
+
+
+        public override Task<SendLeaderReply> SendLeader(SendLeaderRequest request, ServerCallContext context)
+        {
+            Console.WriteLine($"Received new leader for partition {request.PartitionId} from server {request.ServerId}");
+
+            gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.AcceptNewLeader(request.ServerId ,gigaPartitionService.Partitions[request.PartitionId].Partition);
+
+            return Task.FromResult(new SendLeaderReply { Ok = true });
         }
     }
 }

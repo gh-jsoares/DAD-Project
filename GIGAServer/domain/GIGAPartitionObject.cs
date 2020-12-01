@@ -11,7 +11,7 @@ namespace GIGAServer.domain
         public string Name { get; }
         public Dictionary<string, GIGAServerObject> Servers { get; }
         public int ReplicationFactor { get; }
-        public GIGAServerObject MasterServer { get; }
+        public GIGAServerObject MasterServer { get; set; }
         internal GIGARaftObject RaftObject { get; set; }
 
         private Dictionary<string, GIGAObject> objects;
@@ -79,6 +79,21 @@ namespace GIGAServer.domain
         public void CreateRaftObject()
         {
             this.RaftObject = new GIGARaftObject(Servers);
+        }
+
+        public void SetNewMasterServer(string serverId)
+        {
+
+            foreach(var server in Servers)
+            {
+                if(server.Value.Name == serverId)
+                {
+                    MasterServer = server.Value;
+                    break;
+                }
+            }
+
+            Console.WriteLine($"New master server is {serverId}");
         }
     }
 }

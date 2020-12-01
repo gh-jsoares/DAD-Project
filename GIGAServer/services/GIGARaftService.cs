@@ -29,8 +29,7 @@ namespace GIGAServer.services
 
                 Console.WriteLine($"Thread for partition {partition.Key} about to start");
 
-                Thread initState = new Thread(() => FollowerState(partition.Value));
-                initState.Start();
+                StartFollowerThread(partition.Value);
             }
             
         }
@@ -44,9 +43,15 @@ namespace GIGAServer.services
             //Reset everything
             partition.Partition.RaftObject.ResetVotes();
 
-            Thread.Sleep(partition.Partition.RaftObject.Timeout);
+            var cancelled = partition.Partition.RaftObject.TokenSource.Token.WaitHandle.WaitOne(partition.Partition.RaftObject.Timeout);
 
-            StartElection(partition);
+            if (cancelled)
+            {
+                partition.Partition.RaftObject.ReturnToFollower();
+                StartFollowerThread(partition);
+            }
+            else
+                StartElection(partition);
         }
 
         public void StartElection(GIGAPartition partition)
@@ -54,6 +59,8 @@ namespace GIGAServer.services
             partition.Partition.RaftObject.State = 2; //Turn into candidate
 
             partition.Partition.RaftObject.Votes[gigaServerService.Server.Name] = 1;  //Vote for self
+
+            partition.Partition.RaftObject.Term++; //Increment term
 
             Console.WriteLine("START ELECTION");
 
@@ -70,9 +77,63 @@ namespace GIGAServer.services
 
             }
 
+
+            //Wait for answers
+            int majority;
+
+            lock (partition.Partition.RaftObject)
+            {
+                while((majority = partition.Partition.RaftObject.CheckMajority()) == -1 && partition.Partition.RaftObject.State == 2)
+                {
+                    Console.WriteLine(majority);
+                    Monitor.Wait(partition.Partition.RaftObject);
+                }
+            }
+
+            Console.WriteLine(majority);
+
+            //--- Election Outcome ---
+
+            //My term is worse than the other server. I must be a follower.
+            if(partition.Partition.RaftObject.State == 1)
+                StartFollowerThread(partition);
+            //I got the majority. I'm the new leader
+            else if (majority == 1)
+                BecomeLeader(partition);
+
+
+
+                
+
         }
 
+        public void StartFollowerThread(GIGAPartition partition)
+        {
+            Thread initState = new Thread(() => FollowerState(partition));
+            initState.Start();
+        }
 
+        public void BecomeLeader(GIGAPartition partition)
+        {
+            Console.WriteLine("I'm the new leader");
+
+            partition.Partition.RaftObject.State = 3; //Become Leader
+
+            Console.WriteLine("Tell everyone you're the new leader");
+
+            foreach (var partitionClient in partition.PartitionMap)
+            {
+
+                if (partitionClient.Key != gigaServerService.Server.Name)
+                {
+                    Console.WriteLine($"Sent info for partition {partition.Partition.Name}");
+
+                    Thread sendLeaderThread = new Thread(() => partition.SendNewLeader(gigaServerService.Server.Name, partitionClient.Value));
+                    sendLeaderThread.Start();
+                }
+
+            }
+        }
 
     }
 }
