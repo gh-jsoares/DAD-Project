@@ -34,25 +34,29 @@ message WriteObjectReply {
 
 //Ask for votes
 message VoteRequest{
-	string partition_id = 1;
+	int32 term = 1;
 	string server_id = 2;
-	int32 term = 3;
+	int32 lastLogIndex = 3;
+	int32 lastLogTerm = 4;
+	string partition_id = 5;
 }
 
 message VoteReply{
-	bool voteForCandidate = 1;
-	string partition_id = 2;
-	string server_id = 3;
-	int32 term = 4;
+	int32 term = 1;
+	bool voteForCandidate = 2;
+	string partition_id = 3;
+	string server_id = 4;
 }
 
 
-//Tell everyone you're the new leader
+//Tell everyone you're the new leader -> TODO - Should be a AppendEntries RPC
 message SendLeaderRequest{
-	string partition_id = 1;
-	string server_id = 2;
+	int32 term = 1;
+	string partition_id = 2;
+	string server_id = 3;
 }
 
 message SendLeaderReply{
-	bool ok = 1;
+	int32 term = 1;
+	bool ok = 2;
 }

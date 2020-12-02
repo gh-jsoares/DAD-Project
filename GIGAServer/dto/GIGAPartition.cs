@@ -82,25 +82,45 @@ namespace GIGAServer.dto
         internal void SendVoteRequest(string server_id, GIGAPartitionProto.GIGAPartitionService.GIGAPartitionServiceClient partitionClient)
         {
 
-            GIGAPartitionProto.VoteReply reply = partitionClient.Vote(new GIGAPartitionProto.VoteRequest { PartitionId = Partition.Name, ServerId = server_id, Term = Partition.RaftObject.Term });
+            GIGAPartitionProto.VoteReply reply = partitionClient.Vote(
+                new GIGAPartitionProto.VoteRequest { 
+                    Term = Partition.RaftObject.Term, 
+                    ServerId = server_id, 
+                    LastLogIndex = 1, 
+                    LastLogTerm = 1, 
+                    PartitionId = Partition.Name
+                });
 
-            Console.WriteLine($"Received {reply}");
+            Console.WriteLine($"Received VoteReply {reply}");
 
-            Partition.RaftObject.HandleVoteReply(reply);
-
-            lock (Partition.RaftObject)
+            if(Partition.RaftObject.State == 2)
             {
-                Monitor.PulseAll(Partition.RaftObject);
+                Partition.RaftObject.HandleVoteReply(reply);
+
+                Partition.RaftObject.CheckTerm(reply.Term);
+
+                lock (Partition.RaftObject)
+                {
+                    Monitor.PulseAll(Partition.RaftObject);
+                }
             }
+            
                 
         }
 
         internal void SendNewLeader(string server_id, GIGAPartitionProto.GIGAPartitionService.GIGAPartitionServiceClient partitionClient)
         {
 
-            GIGAPartitionProto.SendLeaderReply reply = partitionClient.SendLeader(new GIGAPartitionProto.SendLeaderRequest { PartitionId = Partition.Name, ServerId = server_id });
+            GIGAPartitionProto.SendLeaderReply reply = partitionClient.SendLeader(
+                new GIGAPartitionProto.SendLeaderRequest { 
+                    Term = Partition.RaftObject.Term, 
+                    PartitionId = Partition.Name, 
+                    ServerId = server_id 
+                });
 
-            Console.WriteLine($"Received {reply}");
+            Partition.RaftObject.CheckTerm(reply.Term);
+
+            Console.WriteLine($"Received LeaderReply {reply}");
 
         }
     }

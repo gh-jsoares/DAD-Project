@@ -30,21 +30,42 @@ namespace GIGAServer.grpc
 
         public override Task<VoteReply> Vote(VoteRequest request, ServerCallContext context)
         {
+
+            gigaPartitionService.CheckFrozenServer();
+
             Console.WriteLine($"Received vote for partition {request.PartitionId} from server {request.ServerId}");
 
-            Console.WriteLine($"{gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.VoteReplyDecision(request.Term)}");
+            bool voteForCandidate = gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.VoteReplyDecision(request);
 
-            return Task.FromResult(new VoteReply { VoteForCandidate = gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.VoteReplyDecision(request.Term), ServerId = gigaPartitionService.GigaServerService.Server.Name});
+            Console.WriteLine($"{voteForCandidate}");
+
+            gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.CheckTerm(request.Term);
+
+            if(voteForCandidate)
+                gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.votedFor = request.ServerId;
+
+            return Task.FromResult(new VoteReply
+            {
+                Term = gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.Term,
+                VoteForCandidate = voteForCandidate,
+                PartitionId = request.PartitionId,
+                ServerId = gigaPartitionService.GigaServerService.Server.Name
+            });
+
         }
 
 
         public override Task<SendLeaderReply> SendLeader(SendLeaderRequest request, ServerCallContext context)
         {
+            gigaPartitionService.CheckFrozenServer();
+
             Console.WriteLine($"Received new leader for partition {request.PartitionId} from server {request.ServerId}");
 
             gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.AcceptNewLeader(request.ServerId ,gigaPartitionService.Partitions[request.PartitionId].Partition);
 
-            return Task.FromResult(new SendLeaderReply { Ok = true });
+            gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.CheckTerm(request.Term);
+
+            return Task.FromResult(new SendLeaderReply { Term = gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.Term, Ok = true });
         }
     }
 }
