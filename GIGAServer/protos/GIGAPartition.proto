@@ -7,6 +7,7 @@ service GIGAPartitionService {
 	rpc WriteObject (WriteObjectRequest) returns (WriteObjectReply);
 	rpc Vote (VoteRequest) returns (VoteReply);
 	rpc SendLeader (SendLeaderRequest) returns (SendLeaderReply);
+	rpc ServerCrash (ServerCrashRequest) returns (ServerCrashReply);
 }
 
 /* Lock Message */
@@ -59,4 +60,14 @@ message SendLeaderRequest{
 message SendLeaderReply{
 	int32 term = 1;
 	bool ok = 2;
+}
+
+//Alert of a server crash
+message ServerCrashRequest{
+	string server_id = 1;
+	string partition_id = 2;
+}
+
+message ServerCrashReply{
+	bool ok = 1;
 }

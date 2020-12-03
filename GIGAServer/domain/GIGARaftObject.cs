@@ -93,6 +93,7 @@ namespace GIGAServer.domain
             if(State == 1)
                 TokenSource.Cancel();
 
+            CheckTerm(request.Term);
             Console.WriteLine($"Voted for {votedFor}");
 
             if (request.Term < Term)

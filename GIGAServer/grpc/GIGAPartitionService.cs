@@ -57,15 +57,27 @@ namespace GIGAServer.grpc
 
         public override Task<SendLeaderReply> SendLeader(SendLeaderRequest request, ServerCallContext context)
         {
-            gigaPartitionService.CheckFrozenServer();
-
             Console.WriteLine($"Received new leader for partition {request.PartitionId} from server {request.ServerId}");
+
+            gigaPartitionService.CheckFrozenServerHeartbeat();
 
             gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.AcceptNewLeader(request.ServerId ,gigaPartitionService.Partitions[request.PartitionId].Partition);
 
             gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.CheckTerm(request.Term);
 
             return Task.FromResult(new SendLeaderReply { Term = gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.Term, Ok = true });
+        }
+
+        public override Task<ServerCrashReply> ServerCrash(ServerCrashRequest request, ServerCallContext context)
+        {
+            Console.WriteLine($"Received new server crashed: {request.ServerId}");
+
+            gigaPartitionService.CheckFrozenServer();
+
+            gigaPartitionService.Partitions[request.PartitionId].Partition.RemoveServer(request.ServerId);
+            gigaPartitionService.Partitions[request.PartitionId].PartitionMap.Remove(request.ServerId);
+
+            return Task.FromResult(new ServerCrashReply { Ok = true });
         }
     }
 }

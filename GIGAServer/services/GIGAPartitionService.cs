@@ -45,6 +45,29 @@ namespace GIGAServer.services
                 GigaServerService.FreezeQueuePopEvent.Reset();
         }
 
+        public void CheckFrozenServerHeartbeat()
+        {
+            Random random = new Random();
+
+            // ADD RANDOM DELAY BETWEEN MIN AND MAX
+            Thread.Sleep(random.Next(GigaServerService.MinDelay, GigaServerService.MaxDelay));
+
+            Thread.CurrentThread.Name = string.Format("Thread {0}", Thread.CurrentThread.ManagedThreadId);
+
+            if (GigaServerService.FreezeQueueHeartbeat.Count > 0 || GigaServerService.Frozen)
+                GigaServerService.FreezeQueueHeartbeat.Enqueue(Thread.CurrentThread.Name);
+
+            while (GigaServerService.FreezeQueueHeartbeat.Count > 0)
+            {
+                GigaServerService.FreezeQueueHeartbeatPopEvent.WaitOne();
+                if (Thread.CurrentThread.Name == GigaServerService.FreezePoppedQueueHeartbeat) break;
+                Thread.Sleep(random.Next(100, 500));
+            }
+
+            if (GigaServerService.FreezeQueueHeartbeat.Count > 0)
+                GigaServerService.FreezeQueuePopEvent.Reset();
+        }
+
         internal void LockWrite()
         {
             GigaServerService.WriteQueue.Enqueue(Thread.CurrentThread.Name);

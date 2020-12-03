@@ -95,5 +95,11 @@ namespace GIGAServer.domain
 
             Console.WriteLine($"New master server is {serverId}");
         }
+
+        public void RemoveServer(string server_id)
+        {
+            Servers.Remove(server_id);
+            RaftObject.Votes.Remove(server_id);
+        }
     }
 }

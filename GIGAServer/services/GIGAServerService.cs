@@ -20,6 +20,9 @@ namespace GIGAServer.services
         public Queue<string> FreezeQueue { get; } = new Queue<string>();
         public string FreezePoppedQueue { get; private set; } = "";
         public ManualResetEvent FreezeQueuePopEvent { get; } = new ManualResetEvent(false);
+        public Queue<string> FreezeQueueHeartbeat { get; } = new Queue<string>();
+        public string FreezePoppedQueueHeartbeat { get; private set; } = "";
+        public ManualResetEvent FreezeQueueHeartbeatPopEvent { get; } = new ManualResetEvent(false);
 
         public Queue<string> WriteQueue { get; } = new Queue<string>();
         public string WritePoppedQueue { get; private set; } = "";
@@ -36,6 +39,8 @@ namespace GIGAServer.services
         {
             Frozen = false;
             PopFreezeQueue();
+            while(FreezeQueueHeartbeat.Count != 0)
+                PopFreezeQueueHeartbeat();
             return true;
         }
 
@@ -63,6 +68,13 @@ namespace GIGAServer.services
             if (FreezeQueue.Count == 0) return;
             FreezePoppedQueue = FreezeQueue.Dequeue();
             FreezeQueuePopEvent.Set();
+        }
+
+        internal void PopFreezeQueueHeartbeat()
+        {
+            if (FreezeQueueHeartbeat.Count == 0) return;
+            FreezePoppedQueueHeartbeat = FreezeQueueHeartbeat.Dequeue();
+            FreezeQueueHeartbeatPopEvent.Set();
         }
 
         internal void PopWriteQueue()

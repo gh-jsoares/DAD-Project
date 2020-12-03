@@ -25,7 +25,7 @@ namespace PuppetMaster.Scripts.Commands
 
             GIGAPuppetMasterProto.CrashServerReply reply = client.CrashServerService(new GIGAPuppetMasterProto.CrashServerRequest());
 
-
+            PuppetMaster.ServerMap.Remove(Args[0]);
         }
     }
 }

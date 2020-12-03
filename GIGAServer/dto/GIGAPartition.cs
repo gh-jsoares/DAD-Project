@@ -79,49 +79,92 @@ namespace GIGAServer.dto
             Partition.CreateRaftObject();
         }
 
-        internal void SendVoteRequest(string server_id, GIGAPartitionProto.GIGAPartitionService.GIGAPartitionServiceClient partitionClient)
+        internal void SendVoteRequest(string server_id, string receiver_id, GIGAPartitionProto.GIGAPartitionService.GIGAPartitionServiceClient partitionClient)
         {
-
-            GIGAPartitionProto.VoteReply reply = partitionClient.Vote(
-                new GIGAPartitionProto.VoteRequest { 
-                    Term = Partition.RaftObject.Term, 
-                    ServerId = server_id, 
-                    LastLogIndex = 1, 
-                    LastLogTerm = 1, 
+            try
+            {
+                GIGAPartitionProto.VoteReply reply = partitionClient.Vote(
+                new GIGAPartitionProto.VoteRequest
+                {
+                    Term = Partition.RaftObject.Term,
+                    ServerId = server_id,
+                    LastLogIndex = 1,
+                    LastLogTerm = 1,
                     PartitionId = Partition.Name
                 });
 
-            Console.WriteLine($"Received VoteReply {reply}");
+                Console.WriteLine($"Received VoteReply {reply}");
 
-            if(Partition.RaftObject.State == 2)
-            {
-                Partition.RaftObject.HandleVoteReply(reply);
-
-                Partition.RaftObject.CheckTerm(reply.Term);
-
-                lock (Partition.RaftObject)
+                if (Partition.RaftObject.State == 2)
                 {
-                    Monitor.PulseAll(Partition.RaftObject);
+                    Partition.RaftObject.HandleVoteReply(reply);
+
+                    Partition.RaftObject.CheckTerm(reply.Term);
+
+                    lock (Partition.RaftObject)
+                    {
+                        Monitor.PulseAll(Partition.RaftObject);
+                    }
                 }
             }
+            catch
+            {
+                Console.WriteLine($"{receiver_id} has crashed!");
+
+                HandleServerCrash(receiver_id);
+            }
+            
             
                 
         }
 
-        internal void SendNewLeader(string server_id, GIGAPartitionProto.GIGAPartitionService.GIGAPartitionServiceClient partitionClient)
+        internal void SendNewLeader(string server_id, string receiver_id, GIGAPartitionProto.GIGAPartitionService.GIGAPartitionServiceClient partitionClient)
         {
 
-            GIGAPartitionProto.SendLeaderReply reply = partitionClient.SendLeader(
-                new GIGAPartitionProto.SendLeaderRequest { 
-                    Term = Partition.RaftObject.Term, 
-                    PartitionId = Partition.Name, 
-                    ServerId = server_id 
+            try
+            {
+                GIGAPartitionProto.SendLeaderReply reply = partitionClient.SendLeader(
+                new GIGAPartitionProto.SendLeaderRequest
+                {
+                    Term = Partition.RaftObject.Term,
+                    PartitionId = Partition.Name,
+                    ServerId = server_id
                 });
 
-            Partition.RaftObject.CheckTerm(reply.Term);
+                Partition.RaftObject.CheckTerm(reply.Term);
 
-            Console.WriteLine($"Received LeaderReply {reply}");
+                Console.WriteLine($"Received LeaderReply {reply}");
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine($"{receiver_id} has crashed!");
 
+                HandleServerCrash(receiver_id);
+            }
+            
+        }
+
+        internal void HandleServerCrash(string server_id)
+        {
+            Partition.RemoveServer(server_id);
+            PartitionMap.Remove(server_id);
+
+            //Alert remaining servers of partition
+            foreach (var partitionClient_2 in PartitionMap)
+            {
+                Thread serverCrashThread = new Thread(() => ServerCrash(server_id, partitionClient_2.Value));
+                serverCrashThread.Start();
+            }
+        }
+
+        internal void ServerCrash(string server_id, GIGAPartitionProto.GIGAPartitionService.GIGAPartitionServiceClient partitionClient)
+        {
+            GIGAPartitionProto.ServerCrashReply reply = partitionClient.ServerCrash(
+                new GIGAPartitionProto.ServerCrashRequest
+                {
+                    ServerId = server_id,
+                    PartitionId = Partition.Name
+                });
         }
     }
 }

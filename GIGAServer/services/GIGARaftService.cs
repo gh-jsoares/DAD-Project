@@ -47,11 +47,9 @@ namespace GIGAServer.services
 
             bool cancelled = partition.Partition.RaftObject.TokenSource.Token.WaitHandle.WaitOne(partition.Partition.RaftObject.Timeout);
 
-            Console.WriteLine($"Was token cancelled? {cancelled}");
-
             CheckLeaderAlive(partition, cancelled);
 
-            if(!cancelled)
+            if(!cancelled && !gigaServerService.Frozen)
                 StartElection(partition);
         }
 
@@ -72,7 +70,7 @@ namespace GIGAServer.services
                 {
                     Console.WriteLine($"Sent vote for partition {partition.Partition.Name}");
 
-                    Thread sendVoteThread = new Thread(() => partition.SendVoteRequest(gigaServerService.Server.Name, partitionClient.Value));
+                    Thread sendVoteThread = new Thread(() => partition.SendVoteRequest(gigaServerService.Server.Name, partitionClient.Key ,partitionClient.Value));
                     sendVoteThread.Start();
                 }
 
@@ -123,7 +121,7 @@ namespace GIGAServer.services
 
         public void CheckLeaderAlive(GIGAPartition partition ,bool cancelled)
         {
-            if (cancelled)
+            if (cancelled || gigaServerService.Frozen)
             {
                 StartFollowerThread(partition);
             }
@@ -150,11 +148,11 @@ namespace GIGAServer.services
                 foreach (var partitionClient in partition.PartitionMap)
                 {
 
-                    if (partitionClient.Key != gigaServerService.Server.Name)
+                    if (partitionClient.Key != gigaServerService.Server.Name && !gigaServerService.Frozen)
                     {
                         Console.WriteLine($"Sent heartbeat for partition {partition.Partition.Name}");
 
-                        Thread sendLeaderThread = new Thread(() => partition.SendNewLeader(gigaServerService.Server.Name, partitionClient.Value));
+                        Thread sendLeaderThread = new Thread(() => partition.SendNewLeader(gigaServerService.Server.Name, partitionClient.Key, partitionClient.Value));
                         sendLeaderThread.Start();
                     }
 
@@ -164,7 +162,7 @@ namespace GIGAServer.services
 
                 CheckLeaderAlive(partition, cancelled);
 
-                if (cancelled)
+                if (cancelled || gigaServerService.Frozen)
                     break;
             }
             
