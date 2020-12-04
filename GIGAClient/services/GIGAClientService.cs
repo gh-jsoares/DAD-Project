@@ -284,8 +284,6 @@ namespace GIGAClient.services
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
-
                     if (currentServer != null)
                     {
                         RemoveCurrentPartitionServer();
@@ -331,14 +329,6 @@ namespace GIGAClient.services
                 currentServer = currentPartition.Servers[serverId];
         }
 
-        private void SelectRandomServer()
-        {
-            var index = random.Next(enabledServers.Count);
-            var name = enabledServers.Keys.ElementAt(index);
-            var url = enabledServers[name];
-            currentServer = new GIGAServerObject(name, url);
-        }
-
         private List<GIGAServerObject> PartitionEnabledServers()
         {
             return currentPartition.Servers.Values.ToList()
@@ -357,6 +347,7 @@ namespace GIGAClient.services
             Console.WriteLine(
                 $"Server {currentServer.Name} @ {currentServer.Url} is not responding. Retrying with different server...");
             enabledServers.Remove(currentServer.Name);
+            currentPartition.Servers.Remove(currentServer.Name);
             currentServer = null;
         }
 

@@ -198,8 +198,6 @@ namespace GIGAServer.dto
 
         internal void HandleServerCrash(string server_id, Exception e)
         {
-            Console.Error.WriteLine(e.StackTrace);
-            Console.Error.WriteLine(e.Message);
             Partition.RemoveServer(server_id);
             PartitionMap.Remove(server_id);
 
