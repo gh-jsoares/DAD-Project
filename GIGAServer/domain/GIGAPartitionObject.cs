@@ -37,10 +37,10 @@ namespace GIGAServer.domain
             }
         }
 
-        internal GIGAObject Read(string name)
+        internal GIGALogEntry Read(string name)
         {
             // TODO LOCKED
-            return GetObject(name);
+            return GetEntry(name);
         }
 
         internal bool HasServer(string serverId)
@@ -59,6 +59,11 @@ namespace GIGAServer.domain
         internal List<GIGAPartitionObjectID> GetPartitionObjectIDList()
         {
             return objects.Values.Select(obj => obj.ToPartitionObjectID()).ToList();
+        }
+
+        public GIGALogEntry GetEntry(string name)
+        {
+            return log[log.FindIndex(obj => obj.Data.Name == name)];
         }
 
         public GIGAObject GetObject(string name)

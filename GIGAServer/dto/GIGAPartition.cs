@@ -33,7 +33,7 @@ namespace GIGAServer.dto
             Partition.ShowStatus();
         }
 
-        public GIGAObject Read(string name)
+        public GIGALogEntry Read(string name)
         {
             return Partition.Read(name);
         }

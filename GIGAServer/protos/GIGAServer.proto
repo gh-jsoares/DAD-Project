@@ -20,6 +20,7 @@ message ReadReply {
 	string object_id = 2;
 	string value = 3;
 	bool ok = 4;
+	int32 timestamp = 5;
 }
 
 /* Write Command */ 

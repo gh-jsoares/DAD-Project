@@ -120,7 +120,7 @@ namespace GIGAClient.services
                             }
 
                             Console.WriteLine(
-                                $"Object <{partitionId},{objectId}> found in server \"{currentServer.Name}\" with value: {reply.Value}");
+                                $"Object <{partitionId},{objectId}> found in server \"{currentServer.Name}\" with value: {reply.Value} and timestamp {reply.Timestamp}");
                         }
 
                         retry = false;
