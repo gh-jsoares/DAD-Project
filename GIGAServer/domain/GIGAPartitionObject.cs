@@ -15,6 +15,7 @@ namespace GIGAServer.domain
         internal GIGARaftObject RaftObject { get; set; }
 
         private Dictionary<string, GIGAObject> objects;
+        private List<GIGALogEntry> log;
 
         public GIGAPartitionObject(string name, int replicationFactor, GIGAServerObject[] servers)
         {
@@ -23,6 +24,7 @@ namespace GIGAServer.domain
             if (servers == null) throw new ArgumentNullException(nameof(servers));
             Servers = servers.ToDictionary(server => server.Name, server => server);
             objects = new Dictionary<string, GIGAObject>();
+            log = new List<GIGALogEntry>();
             MasterServer = servers.First();    
         }
 
@@ -49,9 +51,15 @@ namespace GIGAServer.domain
         public void Write(string name, string value)
         {
             if (objects.ContainsKey(name))
+            {
                 objects[name].Value = value;
+                log.Add(new GIGALogEntry(RaftObject.Term, log.Count, objects[name]));
+            }
             else
+            {
                 objects.Add(name, new GIGAObject(this, name, value));
+                log.Add(new GIGALogEntry(RaftObject.Term, log.Count, objects[name]));
+            }
         }
 
         internal List<GIGAPartitionObjectID> GetPartitionObjectIDList()
@@ -72,6 +80,7 @@ namespace GIGAServer.domain
         public void AddObject(string name, GIGAObject value)
         {
             objects.Add(name, value);
+            log.Add(new GIGALogEntry(RaftObject.Term, log.Count, objects[name]));
         }
 
 
