@@ -105,13 +105,13 @@ namespace GIGAServer.services
             return true;
         }
 
-        internal GIGAObject Read(string partitionId, string objectId)
+        internal GIGALogEntry Read(string partitionId, string objectId)
         {
             CheckFrozenServer();
 
             Console.WriteLine("READ");
             if (!Partitions.ContainsKey(partitionId)) return null;
-            GIGAObject obj = Partitions[partitionId].Read(objectId);
+            GIGALogEntry obj = Partitions[partitionId].Read(objectId);
 
             GigaServerService.PopFreezeQueue();
 

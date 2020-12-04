@@ -46,7 +46,7 @@ namespace GIGAClient.services
         public void Write(string partitionId, string objectId, string value)
         {
             string masterServer = null;
-            bool retry = true;
+            var retry = true;
             do
             {
                 try
