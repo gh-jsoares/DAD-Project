@@ -167,6 +167,8 @@ namespace GIGAServer.services
                         }).Start();
                     }
                 }
+
+                Thread.Sleep(100);
             }
         }
 
