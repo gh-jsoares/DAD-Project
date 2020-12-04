@@ -166,7 +166,7 @@ namespace GIGAClient.services
                         if (reply.Ok)
                         {
                             Console.WriteLine(
-                                $"Object <{partitionId},{objectId}> found in server \"{currentServer.Name}\" with value: {reply.Value}");
+                                $"Object <{partitionId},{objectId}> found in server \"{currentServer.Name}\" with value: {reply.Value} (timestamp: {reply.Timestamp})");
                             retry = false;
                         }
                         else if (remaining.Count == 0)

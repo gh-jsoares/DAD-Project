@@ -40,9 +40,9 @@ namespace GIGAServer.domain
             }
         }
 
-        internal GIGALogEntry Read(string name)
+        internal GIGAObject Read(string name)
         {
-            return GetEntry(name);
+            return GetObject(name);
         }
 
         internal bool HasServer(string serverId)
@@ -52,7 +52,7 @@ namespace GIGAServer.domain
 
         public GIGALogEntry CreateLog(string name, string value)
         {
-            var entry = new GIGALogEntry(RaftObject.Term, log.Count, new GIGAObject(this, name, value));
+            var entry = new GIGALogEntry(RaftObject.Term, log.Count, new GIGAObject(this, name, value, log.Count));
             log.Add(entry);
 
             return entry;

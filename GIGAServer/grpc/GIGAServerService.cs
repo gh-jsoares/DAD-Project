@@ -25,11 +25,11 @@ namespace GIGAServer.grpc
             var reply = new ReadReply {Ok = false};
             try
             {
-                GIGALogEntry obj = gigaPartitionService.Read(request.PartitionId, request.ObjectId);
+                GIGAObject obj = gigaPartitionService.Read(request.PartitionId, request.ObjectId);
 
                 if (obj != null)
                     reply = new ReadReply
-                        {Value = obj.Data.Value, ObjectId = obj.Data.Name, PartitionId = obj.Data.Partition.Name, Ok = true, Timestamp = obj.Index};
+                        {Value = obj.Value, ObjectId = obj.Name, PartitionId = obj.Partition.Name, Ok = true, Timestamp = obj.Timestamp};
             }
             catch (Exception e)
             {

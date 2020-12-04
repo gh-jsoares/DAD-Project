@@ -86,12 +86,12 @@ namespace GIGAServer.grpc
 
                 var lastCommittedEntries = request.LastCommittedLogs.Select(lastCommittedLog =>
                     new GIGALogEntry(lastCommittedLog.Term, lastCommittedLog.Log,
-                        new GIGAObject(partitionObject.Partition, lastCommittedLog.ObjectId, lastCommittedLog.Value)));
+                        new GIGAObject(partitionObject.Partition, lastCommittedLog.ObjectId, lastCommittedLog.Value, lastCommittedLog.Log)));
 
                 GIGALogEntry entry = null;
                 if (request.Entry != null)
                     entry = new GIGALogEntry(request.Entry.Term, request.Entry.Log,
-                        new GIGAObject(partitionObject.Partition, request.Entry.ObjectId, request.Entry.Value));
+                        new GIGAObject(partitionObject.Partition, request.Entry.ObjectId, request.Entry.Value, request.Entry.Log));
 
 
                 partitionObject.Partition.RaftObject.AcceptNewLeader(request.ServerId, request.Term, partitionObject.Partition);
