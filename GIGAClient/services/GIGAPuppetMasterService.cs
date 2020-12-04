@@ -19,9 +19,9 @@ namespace GIGAClient.services
             return gigaClientService.RegisterPartition(partitionName, replicationFactor, servers);
         }
 
-        public bool Status()
+        public void Status()
         {
-            return gigaClientService.ShowStatus();
+            gigaClientService.ShowStatus();
         }
       
     }

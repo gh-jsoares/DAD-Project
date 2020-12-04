@@ -17,7 +17,7 @@ namespace GIGAClient.Scripts.Commands
 
         void ICommand.SafeExecute(string[] Args, services.GIGAClientService service)
         {
-            service.listGlobal();
+            service.ListGlobal();
         }
     }
 }

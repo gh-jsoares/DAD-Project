@@ -108,13 +108,11 @@ namespace GIGAServer.services
         internal GIGAObject Read(string partitionId, string objectId)
         {
             CheckFrozenServer();
-            CheckWriteServer();
 
             Console.WriteLine("READ");
             if (!Partitions.ContainsKey(partitionId)) return null;
             GIGAObject obj = Partitions[partitionId].Read(objectId);
 
-            GigaServerService.PopWriteQueue();
             GigaServerService.PopFreezeQueue();
 
             return obj;
@@ -132,7 +130,6 @@ namespace GIGAServer.services
         internal List<GIGAPartitionObjectID> ListObjects(string serverId)
         {
             CheckFrozenServer();
-            CheckWriteServer();
 
             Console.WriteLine("LIST OBJECTS");
 
@@ -143,7 +140,6 @@ namespace GIGAServer.services
                 result.AddRange(partition.GetPartitionObjectIDList());
             }
 
-            GigaServerService.PopWriteQueue();
             GigaServerService.PopFreezeQueue();
 
             return result;
@@ -152,7 +148,6 @@ namespace GIGAServer.services
         internal KeyValuePair<bool, string> Write(string partitionId, string objectId, string value)
         {
             CheckFrozenServer();
-            CheckWriteServer();
             
             Console.WriteLine("WRITE");
 
@@ -160,6 +155,7 @@ namespace GIGAServer.services
             if (!partition.IsMaster(GigaServerService.Server))
             {
                 Console.WriteLine(partition.GetMaster());
+                GigaServerService.PopFreezeQueue();
                 return new KeyValuePair<bool, string>(false, partition.GetMaster());
             }
 
@@ -169,6 +165,7 @@ namespace GIGAServer.services
                 Thread.Sleep(100);
             }
 
+            CheckWriteServer();
             GigaServerService.IsWriting = true;
             var entry = partition.Partition.CreateLog(objectId, value);
             gigaRaftService.BroadcastAppendEntries(partition, entry);
@@ -187,7 +184,6 @@ namespace GIGAServer.services
         internal List<GIGAPartitionObjectID> ListGlobal()
         {
             CheckFrozenServer();
-            CheckWriteServer();
 
             Console.WriteLine("LIST GLOBAL");
             List<GIGAPartitionObjectID> result = new List<GIGAPartitionObjectID>();
@@ -197,7 +193,6 @@ namespace GIGAServer.services
                 result.AddRange(partition.GetPartitionObjectIDList());
             }
 
-            GigaServerService.PopWriteQueue();
             GigaServerService.PopFreezeQueue();
 
             return result;

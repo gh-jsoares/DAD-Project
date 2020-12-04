@@ -21,7 +21,7 @@ namespace GIGAClient.Scripts.Commands
             string objectId = Args[1];
             string value = Args[2];
 
-            service.write(partitionId, objectId, value);
+            service.Write(partitionId, objectId, value);
         }
     }
 }

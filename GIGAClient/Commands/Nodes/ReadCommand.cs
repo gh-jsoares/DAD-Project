@@ -20,7 +20,7 @@ namespace GIGAClient.Scripts.Commands
             string partitionId = Args[0];
             string objectId = Args[1];
             string serverId = Args[2];
-            service.read(partitionId, objectId, serverId);
+            service.Read(partitionId, objectId, serverId);
         }
     }
 }

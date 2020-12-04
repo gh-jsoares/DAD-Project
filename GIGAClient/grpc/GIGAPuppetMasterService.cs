@@ -21,7 +21,8 @@ namespace GIGAClient.grpc
 
         public override Task<GIGAPuppetMasterProto.StatusReply> StatusService(GIGAPuppetMasterProto.StatusRequest request, ServerCallContext context)
         {
-            return Task.FromResult(new GIGAPuppetMasterProto.StatusReply { Ok = gigaPuppetMasterService.Status() });
+            gigaPuppetMasterService.Status();
+            return Task.FromResult(new GIGAPuppetMasterProto.StatusReply { Ok = true });
         }
 
 

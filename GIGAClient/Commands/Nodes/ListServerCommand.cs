@@ -19,7 +19,7 @@ namespace GIGAClient.Scripts.Commands
         {
             string serverId = Args[0];
 
-            service.listServer(serverId);
+            service.ListServer(serverId);
         }
     }
 }

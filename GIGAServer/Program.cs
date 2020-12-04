@@ -55,7 +55,10 @@ namespace GIGAServer
             //Start Raft after everything is setup
             services.GIGARaftService gigaRaftService = new services.GIGARaftService(gigaPartitionService, gigaServerService);
 
-            while (true) ; // doesnt exit
+            Console.WriteLine("Press any key to stop the server...");
+            Console.ReadKey();
+
+            server.ShutdownAsync().Wait();
         }
     }
 }
