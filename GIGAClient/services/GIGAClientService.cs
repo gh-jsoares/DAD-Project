@@ -166,6 +166,35 @@ namespace GIGAClient.services
                         channel = GrpcChannel.ForAddress(currentServer.Url);
                         client = new GIGAServerService.GIGAServerServiceClient(channel);
                         Console.WriteLine($"Connected to server {currentServer.Name} @ {currentServer.Url}");
+
+                        if (currentServer != null)
+                        {
+                            var reply = client.Write(new WriteRequest
+                                {PartitionId = partitionId, ObjectId = objectId, Value = value});
+
+                            if (!reply.Ok)
+                            {
+                                client = null;
+
+                                if (string.IsNullOrEmpty(reply.MasterServer))
+                                {
+                                    // no master server elected yet
+                                    Console.WriteLine("No master for partition yet. Retrying in 1 second");
+                                    Thread.Sleep(1000);
+                                    continue;
+                                }
+
+                                masterServer = reply.MasterServer;
+                                Console.WriteLine("Current server is not master.");
+
+                                continue;
+                            }
+
+                            Console.WriteLine(
+                                $"Object <{partitionId},{objectId}> written in server \"{currentServer.Name}\" with value: {value}");
+                        }
+
+                        retry = false;
                     }
                     catch (Exception e)
                     {
@@ -183,45 +212,6 @@ namespace GIGAClient.services
                             break;
                         }
                     }
-                }
-
-                try
-                {
-                    if (currentServer != null)
-                    {
-                        var reply = client.Write(new WriteRequest
-                            {PartitionId = partitionId, ObjectId = objectId, Value = value});
-
-                        if (!reply.Ok)
-                        {
-                            client = null;
-
-                            if (string.IsNullOrEmpty(reply.MasterServer))
-                            {
-                                // no master server elected yet
-                                Console.WriteLine("No master for partition yet. Retrying in 1 second");
-                                Thread.Sleep(1000);
-                                continue;
-                            }
-
-                            masterServer = reply.MasterServer;
-                            Console.WriteLine("Current server is not master.");
-
-                            continue;
-                        }
-
-                        Console.WriteLine(
-                            $"Object <{partitionId},{objectId}> written in server \"{currentServer.Name}\" with value: {value}");
-                    }
-
-                    retry = false;
-                }
-                catch (Exception e) // server crashed
-                {
-                    Console.WriteLine(
-                        $"Server {currentServer.Name} @ {currentServer.Url} is not responding. Retrying with different server...");
-                    if (currentServer != null)
-                        removeCurrentPartitionServer();
                 }
 
                 cleanConnection();
