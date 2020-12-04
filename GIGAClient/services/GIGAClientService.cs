@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using GIGAClient.domain;
@@ -244,31 +245,25 @@ namespace GIGAClient.services
 
         public void ListGlobal()
         {
-            bool retry;
-            do
+            var servers = enabledServers.ToImmutableDictionary();
+            foreach (var (id, url) in servers)
             {
                 try
                 {
-                    if (currentServer == null)
-                    {
-                        SelectRandomServer();
-                    }
-
+                    currentServer = new GIGAServerObject(id, url);
                     AttemptToConnectToCurrentServer();
 
                     var reply = client.ListGlobal(new ListGlobalRequest());
 
-                    Console.WriteLine("List of entries: Partition => Object");
+                    Console.WriteLine($"Server: '{id}'");
 
+                    // TODO: Include value
                     foreach (var item in reply.Objects)
-                        Console.WriteLine("{0} => {1}", item.PartitionId, item.ObjectId);
-
-                    retry = false;
+                        Console.WriteLine($"\t{item.PartitionId} => {item.ObjectId}");
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e);
-                    retry = true;
 
                     if (currentServer != null)
                     {
@@ -278,14 +273,13 @@ namespace GIGAClient.services
                     if (enabledServers.Count == 0)
                     {
                         Console.WriteLine("No servers available.");
-                        retry = false;
                     }
                 }
                 finally
                 {
                     channel?.ShutdownAsync()?.Wait();
                 }
-            } while (retry);
+            }
         }
 
         private void AttemptToConnectToCurrentServer()
