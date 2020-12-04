@@ -1,11 +1,6 @@
-<<<<<<< HEAD
-ReplicationFactor 3
-Partition 3 p1 s1 s2 s3
-=======
 ReplicationFactor 2
 Partition 2 p1 s1 s2
 Partition 2 part2 s2 s3
->>>>>>> new
 Server s1 http://localhost:3000 0 100
 Server s2 http://localhost:3001 100 300
 Server s3 http://localhost:3002 100 200	
