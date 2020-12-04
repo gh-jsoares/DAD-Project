@@ -158,12 +158,14 @@ namespace GIGAServer.services
 
                 }
 
-                bool cancelled = partition.Partition.RaftObject.TokenSource.Token.WaitHandle.WaitOne(5000);
+                Thread.Sleep(5000);
 
-                CheckLeaderAlive(partition, cancelled);
-
-                if (cancelled || gigaServerService.Frozen)
+                if (partition.Partition.RaftObject.State == 1)
+                {
+                    StartFollowerThread(partition);
                     break;
+                }
+
             }
             
         }
