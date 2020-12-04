@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using GIGAClient.services;
 
 namespace GIGAClient.Scripts.Commands
 {
@@ -20,7 +21,7 @@ namespace GIGAClient.Scripts.Commands
         {
             // TODO VALIDATE INT
             int amount = int.Parse(Args[0]);
-            service.wait(amount);
+            GIGAClientService.Wait(amount);
         }
     }
 }
