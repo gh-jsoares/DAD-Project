@@ -8,6 +8,7 @@ service GIGAPartitionService {
 	rpc Vote (VoteRequest) returns (VoteReply);
 	rpc SendLeader (SendLeaderRequest) returns (SendLeaderReply);
 	rpc ServerCrash (ServerCrashRequest) returns (ServerCrashReply);
+	rpc AppendEntries (AppendEntriesRequest) returns (AppendEntriesReply);
 }
 
 /* Lock Message */
@@ -49,6 +50,19 @@ message VoteReply{
 	string server_id = 4;
 }
 
+message AppendEntriesRequest {
+	string partition_id = 1;
+	string server_id = 2;
+	int32 term = 3;
+	LogEntryProto entry = 4;
+	repeated LogEntryProto last_committed_logs = 5;
+}
+
+message AppendEntriesReply {
+	bool ok = 1;
+	int32 term = 2;
+	LogEntryProto last_committed_log = 3;
+}
 
 //Tell everyone you're the new leader -> TODO - Should be a AppendEntries RPC
 message SendLeaderRequest{
@@ -70,4 +84,12 @@ message ServerCrashRequest{
 
 message ServerCrashReply{
 	bool ok = 1;
+}
+
+// Objects
+message LogEntryProto {
+	int32 term = 1;
+	int32 log = 2;
+	string object_id = 3;
+	string value = 4;
 }

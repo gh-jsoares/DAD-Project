@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GIGAPartitionProto;
 
 namespace GIGAServer.services
 {
@@ -13,14 +14,17 @@ namespace GIGAServer.services
         public int ReplicationFactor { get; set; }
         internal Dictionary<string, GIGAPartition> Partitions { get; set; } = new Dictionary<string, GIGAPartition>();
         internal GIGAServerService GigaServerService { get; set; }
+        private GIGARaftService gigaRaftService;
 
         public GIGAPartitionService(GIGAServerService gigaServerService)
         {
             this.GigaServerService = gigaServerService;
-
-         
         }
 
+        public void InitRaftService(GIGARaftService raftService)
+        {
+            gigaRaftService = raftService;
+        }
 
         public void CheckFrozenServer()
         {
@@ -73,17 +77,11 @@ namespace GIGAServer.services
             GigaServerService.WriteQueue.Enqueue(Thread.CurrentThread.Name);
         }
 
-        internal void PerformWrite(string partitionId, string objectId, string value)
-        {
-            Partitions[partitionId].PerformWrite(objectId, value);
-            GigaServerService.PopWriteQueue();
-        }
-
         public void CheckWriteServer()
         {
             Random random = new Random();
 
-            if (GigaServerService.WriteQueue.Count > 0)
+            if (GigaServerService.WriteQueue.Count > 0 || GigaServerService.IsWriting)
                 GigaServerService.WriteQueue.Enqueue(Thread.CurrentThread.Name);
 
             while(GigaServerService.WriteQueue.Count > 0)
@@ -99,10 +97,10 @@ namespace GIGAServer.services
 
         public bool RegisterPartition(string id, int replicationFactor, GIGAServerObject[] servers)
         {
-            Console.WriteLine("REGISTER PARTITION");
             if (Partitions.ContainsKey(id)) return false;
+            Console.WriteLine("REGISTER PARTITION");
 
-            Partitions.Add(id, new GIGAPartition(id, replicationFactor, servers));
+            Partitions.Add(id, new GIGAPartition(id, replicationFactor, servers, GigaServerService.Server));
 
             return true;
         }
@@ -161,9 +159,24 @@ namespace GIGAServer.services
             GIGAPartition partition = Partitions[partitionId];
             if (!partition.IsMaster(GigaServerService.Server))
             {
-                return new KeyValuePair<bool, string>(false, partition.Master.Name);
+                Console.WriteLine(partition.GetMaster());
+                return new KeyValuePair<bool, string>(false, partition.GetMaster());
             }
-            partition.Write(objectId, value);
+
+            // wait for raft service to startup
+            while (gigaRaftService == null)
+            {
+                Thread.Sleep(100);
+            }
+
+            GigaServerService.IsWriting = true;
+            var entry = partition.Partition.CreateLog(objectId, value);
+            gigaRaftService.BroadcastAppendEntries(partition, entry);
+            
+            // Commit entry and replace read value
+            partition.Partition.CommitEntry(entry);
+            
+            GigaServerService.IsWriting = false;
 
             GigaServerService.PopWriteQueue();
             GigaServerService.PopFreezeQueue();

@@ -13,7 +13,8 @@ namespace GIGAServer.grpc
         private services.GIGAServerService gigaServerService;
         private services.GIGAPartitionService gigaPartitionService;
 
-        public GIGAServerService(services.GIGAServerService gigaServerService, services.GIGAPartitionService gigaPartitionService)
+        public GIGAServerService(services.GIGAServerService gigaServerService,
+            services.GIGAPartitionService gigaPartitionService)
         {
             this.gigaServerService = gigaServerService;
             this.gigaPartitionService = gigaPartitionService;
@@ -21,19 +22,40 @@ namespace GIGAServer.grpc
 
         public override Task<ReadReply> Read(ReadRequest request, ServerCallContext context)
         {
-            GIGAObject obj = gigaPartitionService.Read(request.PartitionId, request.ObjectId);
-            ReadReply reply = new ReadReply { Ok = false };
+            var reply = new ReadReply {Ok = false};
+            try
+            {
+                GIGAObject obj = gigaPartitionService.Read(request.PartitionId, request.ObjectId);
 
-            if (obj != null)
-                reply = new ReadReply { Value = obj.Value, ObjectId = obj.Name, PartitionId = obj.Partition.Name, Ok = true };
+                if (obj != null)
+                    reply = new ReadReply
+                        {Value = obj.Value, ObjectId = obj.Name, PartitionId = obj.Partition.Name, Ok = true};
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
 
             return Task.FromResult(reply);
         }
 
         public override Task<WriteReply> Write(WriteRequest request, ServerCallContext context)
         {
-            KeyValuePair<bool, string> result = gigaPartitionService.Write(request.PartitionId, request.ObjectId, request.Value);
-            WriteReply reply = new WriteReply { Ok = result.Key, MasterServer = result.Value };
+            var reply = new WriteReply {Ok = false};
+            try
+            {
+                var (ok, masterServerID) =
+                    gigaPartitionService.Write(request.PartitionId, request.ObjectId, request.Value);
+                reply.Ok = ok;
+                if (masterServerID != null)
+                    reply.MasterServer = masterServerID;
+                Console.WriteLine(reply);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
 
             return Task.FromResult(reply);
         }
@@ -42,12 +64,13 @@ namespace GIGAServer.grpc
         {
             ListServerReply reply = new ListServerReply();
 
-            reply.Objects.AddRange(gigaPartitionService.ListObjects(request.ServerId).Select(objectId => new PartitionObjectID
-            {
-                PartitionId = objectId.PartitionName,
-                ObjectId = objectId.ObjectName,
-                IsMaster = objectId.MasterServerName == gigaServerService.Server.Name
-            }));
+            reply.Objects.AddRange(gigaPartitionService.ListObjects(request.ServerId).Select(objectId =>
+                new PartitionObjectID
+                {
+                    PartitionId = objectId.PartitionName,
+                    ObjectId = objectId.ObjectName,
+                    IsMaster = objectId.MasterServerName == gigaServerService.Server.Name
+                }));
 
             return Task.FromResult(reply);
         }
@@ -56,7 +79,8 @@ namespace GIGAServer.grpc
         {
             ListGlobalReply reply = new ListGlobalReply();
 
-            reply.Objects.AddRange(gigaPartitionService.ListGlobal().Select(objectId => new PartitionObjectID { PartitionId = objectId.PartitionName, ObjectId = objectId.ObjectName }));
+            reply.Objects.AddRange(gigaPartitionService.ListGlobal().Select(objectId => new PartitionObjectID
+                {PartitionId = objectId.PartitionName, ObjectId = objectId.ObjectName}));
 
             return Task.FromResult(reply);
         }

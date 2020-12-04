@@ -89,20 +89,34 @@ namespace GIGAClient.services
 
         public void write(string partitionId, string objectId, string value)
         {
-            if (currentPartition == null || currentPartition.Name != partitionId) ConnectToPartition(partitionId);
-            WriteReply reply = client.Write(new WriteRequest { PartitionId = partitionId, ObjectId = objectId, Value = value});
-
-            if (!reply.Ok)
+            var attempts = 0;
+            while (attempts < 100)
             {
-                Console.WriteLine("Current server is not master.");
-                ConnectToPartitionServer(partitionId, reply.MasterServer);
-                reply = client.Write(new WriteRequest { PartitionId = partitionId, ObjectId = objectId, Value = value});
-            }
+                if (currentPartition == null || currentPartition.Name != partitionId) ConnectToPartition(partitionId);
+                WriteReply reply = client.Write(new WriteRequest { PartitionId = partitionId, ObjectId = objectId, Value = value});
 
-            if (reply.Ok)
-                Console.WriteLine("Object <{0},{1}> written in server \"{2}\" with value: {3}", partitionId, objectId, currentServer.Name, value);
-            else
-                Console.WriteLine("An error occurred.");
+                if (!reply.Ok)
+                {
+                    Console.WriteLine("Current server is not master.");
+                    
+                    if (string.IsNullOrEmpty(reply.MasterServer))
+                    {
+                        // no master server elected yet
+                        Thread.Sleep(100);
+                        attempts++;
+                        continue;
+                    }
+                    
+                    ConnectToPartitionServer(partitionId, reply.MasterServer);
+                    reply = client.Write(new WriteRequest { PartitionId = partitionId, ObjectId = objectId, Value = value});
+                }
+
+                if (reply.Ok)
+                    Console.WriteLine("Object <{0},{1}> written in server \"{2}\" with value: {3}", partitionId, objectId, currentServer.Name, value);
+                else
+                    Console.WriteLine("An error occurred.");
+                break;
+            }
         }
 
         public void listServer(string serverId)

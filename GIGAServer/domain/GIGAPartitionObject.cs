@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using GIGAPartitionProto;
 
 namespace GIGAServer.domain
 {
@@ -25,7 +26,6 @@ namespace GIGAServer.domain
             Servers = servers.ToDictionary(server => server.Name, server => server);
             objects = new Dictionary<string, GIGAObject>();
             log = new List<GIGALogEntry>();
-            MasterServer = servers.First();    
         }
 
         internal void ShowStatus()
@@ -48,18 +48,12 @@ namespace GIGAServer.domain
             return Servers.ContainsKey(serverId);
         }
 
-        public void Write(string name, string value)
+        public GIGALogEntry CreateLog(string name, string value)
         {
-            if (objects.ContainsKey(name))
-            {
-                objects[name].Value = value;
-                log.Add(new GIGALogEntry(RaftObject.Term, log.Count, objects[name]));
-            }
-            else
-            {
-                objects.Add(name, new GIGAObject(this, name, value));
-                log.Add(new GIGALogEntry(RaftObject.Term, log.Count, objects[name]));
-            }
+            var entry = new GIGALogEntry(RaftObject.Term, log.Count, new GIGAObject(this, name, value));
+            log.Add(entry);
+
+            return entry;
         }
 
         internal List<GIGAPartitionObjectID> GetPartitionObjectIDList()
@@ -77,13 +71,6 @@ namespace GIGAServer.domain
             return objects.ContainsKey(name);
         }
 
-        public void AddObject(string name, GIGAObject value)
-        {
-            objects.Add(name, value);
-            log.Add(new GIGALogEntry(RaftObject.Term, log.Count, objects[name]));
-        }
-
-
         //Raft
         public void CreateRaftObject()
         {
@@ -92,10 +79,9 @@ namespace GIGAServer.domain
 
         public void SetNewMasterServer(string serverId)
         {
-
-            foreach(var server in Servers)
+            foreach (var server in Servers)
             {
-                if(server.Value.Name == serverId)
+                if (server.Value.Name == serverId)
                 {
                     MasterServer = server.Value;
                     break;
@@ -109,6 +95,85 @@ namespace GIGAServer.domain
         {
             Servers.Remove(server_id);
             RaftObject.Votes.Remove(server_id);
+        }
+
+        public int GetLastLogIndex()
+        {
+            return GetLastCommittedLog()?.Index ?? 0;
+        }
+
+        public int GetLastLogTerm()
+        {
+            return GetLastCommittedLog()?.Term ?? 0;
+        }
+
+        public GIGALogEntry GetLastCommittedLog()
+        {
+            try
+            {
+                return log.FindAll(entry => entry.Committed).Last();
+            }
+            catch (Exception)
+            {
+                // not found
+                return null;
+            }
+        }
+
+        private void simpleWrite(GIGAObject obj)
+        {
+            if (objects.ContainsKey(obj.Name))
+            {
+                objects[obj.Name] = obj;
+            }
+            else
+            {
+                objects.Add(obj.Name, obj);
+            }
+        }
+
+        public void CommitEntry(GIGALogEntry entry)
+        {
+            simpleWrite(entry.Data);
+            entry.Committed = true;
+        }
+
+        public GIGALogEntry AppendEntries(GIGALogEntry entry, List<GIGALogEntry> lastCommittedEntries)
+        {
+            var lastCommitted = GetLastCommittedLog();
+
+            if (lastCommittedEntries.Count() != 0)
+            {
+                if (lastCommitted != null)
+                {
+                    var receivedLastCommitted = lastCommittedEntries.First();
+                    if (lastCommitted.Term != receivedLastCommitted.Term ||
+                        lastCommitted.Index != receivedLastCommitted.Index)
+                    {
+                        return lastCommitted;
+                    }
+
+                    // I have inconsistent logs, but ive received the correct ones, so ill apply them
+                    var lastIndex = log.FindIndex(logEntry
+                        => logEntry.Term == lastCommitted.Term && logEntry.Index == lastCommitted.Index);
+                    log.RemoveRange(lastIndex, log.Count() - lastIndex);
+                }
+
+                foreach (var lastCommittedEntry in lastCommittedEntries)
+                {
+                    CommitEntry(lastCommittedEntry);
+                }
+            }
+
+            // Finally, add the current entry
+            log.Add(entry);
+
+            return null;
+        }
+
+        public GIGALogEntry GetLastCommittedLogBefore(int index, int term)
+        {
+            return log.FindLast(entry => entry.Index == index && entry.Term == term && entry.Committed);
         }
     }
 }

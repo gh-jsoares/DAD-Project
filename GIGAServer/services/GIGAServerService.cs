@@ -14,6 +14,7 @@ namespace GIGAServer.services
         public GIGAServerObject Server { get; }
         public int ReplicationFactor { get; set; }
         public bool Frozen { get; private set; } = false;
+        public bool IsWriting { get; set; } = false;
         public int MinDelay { get; }
         public int MaxDelay { get; }
 

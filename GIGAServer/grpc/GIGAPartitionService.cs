@@ -2,8 +2,10 @@
 using GIGAServerProto;
 using Grpc.Core;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GIGAServer.domain;
 
 namespace GIGAServer.grpc
 {
@@ -16,32 +18,20 @@ namespace GIGAServer.grpc
             this.gigaPartitionService = gigaPartitionService;
         }
 
-        public override Task<LockObjectReply> LockObject(LockObjectRequest request, ServerCallContext context)
-        {
-            gigaPartitionService.LockWrite();
-            return Task.FromResult(new LockObjectReply { Ok = true } );
-        }
-
-        public override Task<WriteObjectReply> WriteObject(WriteObjectRequest request, ServerCallContext context)
-        {
-            gigaPartitionService.PerformWrite(request.PartitionId, request.ObjectId, request.Value);
-            return Task.FromResult(new WriteObjectReply { Ok = true }) ;
-        }
-
         public override Task<VoteReply> Vote(VoteRequest request, ServerCallContext context)
         {
-
             gigaPartitionService.CheckFrozenServer();
 
             Console.WriteLine($"Received vote for partition {request.PartitionId} from server {request.ServerId}");
 
-            bool voteForCandidate = gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.VoteReplyDecision(request);
+            bool voteForCandidate = gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject
+                .VoteReplyDecision(request, gigaPartitionService.Partitions[request.PartitionId].Partition);
 
-            Console.WriteLine($"{voteForCandidate}");
+            Console.WriteLine($"{voteForCandidate.ToString()}");
 
             gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.CheckTerm(request.Term);
 
-            if(voteForCandidate)
+            if (voteForCandidate)
                 gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.votedFor = request.ServerId;
 
             return Task.FromResult(new VoteReply
@@ -51,21 +41,23 @@ namespace GIGAServer.grpc
                 PartitionId = request.PartitionId,
                 ServerId = gigaPartitionService.GigaServerService.Server.Name
             });
-
         }
 
 
         public override Task<SendLeaderReply> SendLeader(SendLeaderRequest request, ServerCallContext context)
         {
-            Console.WriteLine($"Received new leader for partition {request.PartitionId} from server {request.ServerId}");
+            Console.WriteLine(
+                $"Received new leader for partition {request.PartitionId} from server {request.ServerId}");
 
             gigaPartitionService.CheckFrozenServerHeartbeat();
 
-            gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.AcceptNewLeader(request.ServerId ,gigaPartitionService.Partitions[request.PartitionId].Partition);
+            gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.AcceptNewLeader(request.ServerId,
+                gigaPartitionService.Partitions[request.PartitionId].Partition);
 
             gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.CheckTerm(request.Term);
 
-            return Task.FromResult(new SendLeaderReply { Term = gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.Term, Ok = true });
+            return Task.FromResult(new SendLeaderReply
+                {Term = gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.Term, Ok = true});
         }
 
         public override Task<ServerCrashReply> ServerCrash(ServerCrashRequest request, ServerCallContext context)
@@ -77,8 +69,58 @@ namespace GIGAServer.grpc
             gigaPartitionService.Partitions[request.PartitionId].Partition.RemoveServer(request.ServerId);
             gigaPartitionService.Partitions[request.PartitionId].PartitionMap.Remove(request.ServerId);
 
-            return Task.FromResult(new ServerCrashReply { Ok = true });
+            return Task.FromResult(new ServerCrashReply {Ok = true});
+        }
+
+        public override Task<AppendEntriesReply> AppendEntries(AppendEntriesRequest request, ServerCallContext context)
+        {
+            Console.WriteLine(
+                $"Received new append entries from leader {request.ServerId} in partition {request.PartitionId}");
+            gigaPartitionService.CheckFrozenServerHeartbeat();
+            var appendEntriesReply = new AppendEntriesReply();
+            Console.WriteLine(request);
+
+            try
+            {
+                var partitionObject = gigaPartitionService.Partitions[request.PartitionId];
+
+                var lastCommittedEntries = request.LastCommittedLogs.Select(lastCommittedLog =>
+                    new GIGALogEntry(lastCommittedLog.Term, lastCommittedLog.Log,
+                        new GIGAObject(partitionObject.Partition, lastCommittedLog.ObjectId, lastCommittedLog.Value)));
+
+                GIGALogEntry entry = null;
+                if (request.Entry != null)
+                    entry = new GIGALogEntry(request.Entry.Term, request.Entry.Log,
+                        new GIGAObject(partitionObject.Partition, request.Entry.ObjectId, request.Entry.Value));
+
+
+                partitionObject.Partition.RaftObject.AcceptNewLeader(request.ServerId, partitionObject.Partition);
+                partitionObject.Partition.RaftObject.CheckTerm(request.Term);
+
+                var lastCommittedLog = partitionObject.Partition.AppendEntries(entry, lastCommittedEntries.ToList());
+
+                appendEntriesReply.Ok = lastCommittedLog == null;
+                appendEntriesReply.Term = partitionObject.Partition.RaftObject.Term;
+
+                if (lastCommittedLog != null)
+                {
+                    appendEntriesReply.LastCommittedLog = new LogEntryProto
+                    {
+                        Log = lastCommittedLog.Index,
+                        ObjectId = lastCommittedLog.Data.Name,
+                        Term = lastCommittedLog.Term,
+                        Value = lastCommittedLog.Data.Value
+                    };
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.StackTrace);
+                Console.WriteLine(e.Message);
+                throw;
+            }
+
+            return Task.FromResult(appendEntriesReply);
         }
     }
 }
-

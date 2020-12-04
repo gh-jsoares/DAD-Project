@@ -10,7 +10,6 @@ namespace GIGAServer.services
 {
     class GIGARaftService
     {
-
         private GIGAPartitionService gigaPartitionService;
 
         private GIGAServerService gigaServerService;
@@ -19,6 +18,7 @@ namespace GIGAServer.services
         {
             Thread.Sleep(2000);
 
+            gigaPartitionService.InitRaftService(this);
             this.gigaPartitionService = gigaPartitionService;
             this.gigaServerService = gigaServerService;
 
@@ -33,10 +33,7 @@ namespace GIGAServer.services
 
                     StartFollowerThread(partition.Value);
                 }
-
-                
             }
-            
         }
 
         //RAFT Methods
@@ -45,11 +42,13 @@ namespace GIGAServer.services
         {
             Console.WriteLine($"Thread for partition {partition.Partition.Name} started");
 
-            bool cancelled = partition.Partition.RaftObject.TokenSource.Token.WaitHandle.WaitOne(partition.Partition.RaftObject.Timeout);
+            bool cancelled =
+                partition.Partition.RaftObject.TokenSource.Token.WaitHandle.WaitOne(partition.Partition.RaftObject
+                    .Timeout);
 
             CheckLeaderAlive(partition, cancelled);
 
-            if(!cancelled && !gigaServerService.Frozen)
+            if (!cancelled && !gigaServerService.Frozen)
                 StartElection(partition);
         }
 
@@ -59,21 +58,21 @@ namespace GIGAServer.services
 
             partition.Partition.RaftObject.State = 2; //Turn into candidate
 
-            partition.Partition.RaftObject.VoteForSelf(gigaServerService.Server.Name);  //Vote for self
+            partition.Partition.RaftObject.VoteForSelf(gigaServerService.Server.Name); //Vote for self
 
             Console.WriteLine($"START ELECTION ; Term: {partition.Partition.RaftObject.Term}");
 
             foreach (var partitionClient in partition.PartitionMap)
             {
-
-                if(partitionClient.Key != gigaServerService.Server.Name)
+                if (partitionClient.Key != gigaServerService.Server.Name)
                 {
                     Console.WriteLine($"Sent vote for partition {partition.Partition.Name}");
 
-                    Thread sendVoteThread = new Thread(() => partition.SendVoteRequest(gigaServerService.Server.Name, partitionClient.Key ,partitionClient.Value));
+                    Thread sendVoteThread = new Thread(() =>
+                        partition.SendVoteRequest(gigaServerService.Server.Name, partitionClient.Key,
+                            partitionClient.Value));
                     sendVoteThread.Start();
                 }
-
             }
 
 
@@ -85,13 +84,13 @@ namespace GIGAServer.services
             electionTimeout.Start();
 
 
-
             //Wait for answers
             int majority;
 
             lock (partition.Partition.RaftObject)
             {
-                while((majority = partition.Partition.RaftObject.CheckMajority()) != 1 && partition.Partition.RaftObject.State == 2 && !partition.Partition.RaftObject.electionTimeout)
+                while ((majority = partition.Partition.RaftObject.CheckMajority()) != 1 &&
+                       partition.Partition.RaftObject.State == 2 && !partition.Partition.RaftObject.electionTimeout)
                 {
                     Monitor.Wait(partition.Partition.RaftObject);
                 }
@@ -103,23 +102,16 @@ namespace GIGAServer.services
             //--- Election Outcome ---
 
             //My term is worse than the other server. I must be a follower.
-            if(partition.Partition.RaftObject.State == 1)
+            if (partition.Partition.RaftObject.State == 1)
                 StartFollowerThread(partition);
             //I got the majority. I'm the new leader
             else if (majority == 1)
                 BecomeLeader(partition);
             else
                 StartElection(partition);
-            
-               
-
-
-
-
-
         }
 
-        public void CheckLeaderAlive(GIGAPartition partition ,bool cancelled)
+        public void CheckLeaderAlive(GIGAPartition partition, bool cancelled)
         {
             if (cancelled || gigaServerService.Frozen)
             {
@@ -139,23 +131,35 @@ namespace GIGAServer.services
             Console.WriteLine("I'm the new leader");
 
             partition.Partition.RaftObject.State = 3; //Become Leader
+            partition.Partition.MasterServer = gigaServerService.Server;
 
             Console.WriteLine("Tell everyone you're the new leader");
 
+            BroadcastAppendEntries(partition, null);
+        }
 
-            while (true)
+        public void BroadcastAppendEntries(GIGAPartition partition, GIGALogEntry entry)
+        {
+            int successful = 0;
+            Console.WriteLine(partition.PartitionMap.Count);
+
+            while (successful < Math.Ceiling(partition.PartitionMap.Count / 2.0))
             {
                 foreach (var partitionClient in partition.PartitionMap)
                 {
-
                     if (partitionClient.Key != gigaServerService.Server.Name && !gigaServerService.Frozen)
                     {
                         Console.WriteLine($"Sent heartbeat for partition {partition.Partition.Name}");
 
-                        Thread sendLeaderThread = new Thread(() => partition.SendNewLeader(gigaServerService.Server.Name, partitionClient.Key, partitionClient.Value));
-                        sendLeaderThread.Start();
-                    }
+                        new Thread(() =>
+                        {
+                            partition.SendAppendNewEntries(gigaServerService.Server.Name, partitionClient.Key,
+                                partitionClient.Value, entry);
 
+                            // accepted
+                            successful++;
+                        }).Start();
+                    }
                 }
 
                 bool cancelled = partition.Partition.RaftObject.TokenSource.Token.WaitHandle.WaitOne(5000);
@@ -165,7 +169,6 @@ namespace GIGAServer.services
                 if (cancelled || gigaServerService.Frozen)
                     break;
             }
-            
         }
 
         public void ElectionTimeoutThread(GIGAPartition partition, CancellationTokenSource timeoutToken)
@@ -183,8 +186,6 @@ namespace GIGAServer.services
                     Monitor.Pulse(partition.Partition.RaftObject);
                 }
             }
-
         }
-
     }
 }

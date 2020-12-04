@@ -11,14 +11,15 @@ namespace GIGAServer.domain
 {
     class GIGARaftObject
     {
-
         const int minTimeout = 10000;
         const int maxTimeout = 20000;
 
-        public int State { get; set; }   //1 - Follower; 2 - Candidate ; 3 - Leader
+        public int State { get; set; } //1 - Follower; 2 - Candidate ; 3 - Leader
         public int Term { get; set; }
         public int Timeout { get; set; }
-        public Dictionary<string, int> Votes { get; set; }  // -1 -> No vote yet received ; 0 -> Received no vote ; 1 -> Received vote
+
+        public Dictionary<string, int>
+            Votes { get; set; } // -1 -> No vote yet received ; 0 -> Received no vote ; 1 -> Received vote
 
         public string votedFor;
 
@@ -28,7 +29,6 @@ namespace GIGAServer.domain
 
         public CancellationTokenSource TokenSource { get; set; }
 
-        
 
         public GIGARaftObject(Dictionary<string, GIGAServerObject> Servers)
         {
@@ -42,7 +42,7 @@ namespace GIGAServer.domain
             Votes = new Dictionary<string, int>();
             foreach (var server in Servers)
             {
-                Votes.Add(server.Key, -1);           
+                Votes.Add(server.Key, -1);
             }
 
             electionTimeout = false;
@@ -66,14 +66,14 @@ namespace GIGAServer.domain
             {
                 Console.WriteLine("Majority achieved");
                 return 1;
-            }else if (votesAgainst > Votes.Count / 2)
+            }
+            else if (votesAgainst > Votes.Count / 2)
             {
                 Console.WriteLine("Majority not achieved");
                 return 0;
             }
 
             return -1;
-
         }
 
         public void HandleVoteReply(GIGAPartitionProto.VoteReply reply)
@@ -82,28 +82,21 @@ namespace GIGAServer.domain
                 Votes[reply.ServerId] = 1;
             else
             {
-                Votes[reply.ServerId] = 0;               
+                Votes[reply.ServerId] = 0;
             }
-                 
         }
 
-        public bool VoteReplyDecision(VoteRequest request)
+        public bool VoteReplyDecision(VoteRequest request, GIGAPartitionObject partition)
         {
-
-            if(State == 1)
+            if (State == 1)
                 TokenSource.Cancel();
 
             CheckTerm(request.Term);
             Console.WriteLine($"Voted for {votedFor}");
 
-            if (request.Term < Term)
-                return false;
-            else if ((votedFor == null || votedFor == request.ServerId) /*&& request.LastLogIndex >= 1 && request.LastLogTerm >= 1*/)
-                return true;
-            
-                
-
-            return false;
+            return request.Term >= Term && (votedFor == null || votedFor == request.ServerId) &&
+                   request.LastLogIndex >= partition.GetLastLogIndex() &&
+                   request.LastLogTerm >= partition.GetLastLogTerm();
         }
 
         public void AcceptNewLeader(string serverId, GIGAPartitionObject partitionObject)
@@ -135,13 +128,12 @@ namespace GIGAServer.domain
 
         public void CheckTerm(int term)
         {
-            if(term > Term)
+            if (term > Term)
             {
                 Term = term;
                 votedFor = null;
                 ReturnToFollower();
             }
-
         }
 
         public void NewTerm()
