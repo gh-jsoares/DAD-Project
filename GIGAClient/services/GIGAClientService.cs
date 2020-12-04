@@ -127,6 +127,12 @@ namespace GIGAClient.services
             if (currentPartition != null)
                 remaining.AddRange(PartitionEnabledServers().Select(s => s.Name));
 
+            if (!remaining.Contains(nextServer))
+            {
+                nextServer = remaining.FirstOrDefault();
+                nextServer = string.IsNullOrEmpty(nextServer) ? null : nextServer;
+            }
+
             var retry = true;
             do
             {
@@ -150,30 +156,46 @@ namespace GIGAClient.services
                         SelectServer(nextServer);
                     }
 
-                    AttemptToConnectToCurrentServer();
-                    remaining.Remove(currentServer.Name);
-
-                    var reply = client.Read(new ReadRequest {ObjectId = objectId, PartitionId = partitionId});
-
-                    if (reply.Ok)
+                    if (currentServer != null)
                     {
-                        Console.WriteLine(
-                            $"Object <{partitionId},{objectId}> found in server \"{currentServer.Name}\" with value: {reply.Value}");
-                        retry = false;
-                    }
-                    else if (remaining.Count == 0)
-                    {
-                        Console.WriteLine($"Object <{partitionId},{objectId}> not found in storage");
-                        retry = false;
+                        AttemptToConnectToCurrentServer();
+                        remaining.Remove(currentServer.Name);
+
+                        var reply = client.Read(new ReadRequest {ObjectId = objectId, PartitionId = partitionId});
+
+                        if (reply.Ok)
+                        {
+                            Console.WriteLine(
+                                $"Object <{partitionId},{objectId}> found in server \"{currentServer.Name}\" with value: {reply.Value}");
+                            retry = false;
+                        }
+                        else if (remaining.Count == 0)
+                        {
+                            Console.WriteLine($"Object <{partitionId},{objectId}> not found in storage");
+                            retry = false;
+                        }
+                        else
+                        {
+                            nextServer = remaining.Contains(nextServer) ? serverHint : remaining.First();
+
+                            Console.WriteLine(
+                                $"Object <{partitionId},{objectId}> not found in server \"{currentServer.Name}\"");
+
+                            currentServer = null;
+                        }
                     }
                     else
                     {
-                        nextServer = remaining.Contains(nextServer) ? serverHint : remaining.First();
-
-                        Console.WriteLine(
-                            $"Object <{partitionId},{objectId}> not found in server \"{currentServer.Name}\"");
-
-                        currentServer = null;
+                        remaining.Remove(nextServer);
+                        if (remaining.Count == 0)
+                        {
+                            Console.WriteLine($"Object <{partitionId},{objectId}> not found in storage");
+                            retry = false;
+                        }
+                        else
+                        {
+                            nextServer = remaining.First();
+                        }
                     }
                 }
                 catch (Exception e)
@@ -231,7 +253,6 @@ namespace GIGAClient.services
                 // Server crashed
                 Console.WriteLine($"Requested server {serverId} not found. Possibly crashed");
             }
-
             finally
             {
                 channel?.ShutdownAsync()?.Wait();
@@ -306,7 +327,7 @@ namespace GIGAClient.services
 
         private void SelectServer(string serverId)
         {
-            if (enabledServers.ContainsKey(serverId))
+            if (enabledServers.ContainsKey(serverId) && currentPartition.HasServer(serverId))
                 currentServer = currentPartition.Servers[serverId];
         }
 
