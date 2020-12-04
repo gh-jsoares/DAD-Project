@@ -134,7 +134,7 @@ namespace GIGAServer.services
             Console.WriteLine("Tell everyone you're the new leader");
 
 
-            while (partition.Partition.RaftObject.State == 1)
+            while (partition.Partition.RaftObject.State == 3)
             {
                 foreach (var partitionClient in partition.PartitionMap)
                 {
