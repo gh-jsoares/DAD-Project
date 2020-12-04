@@ -135,7 +135,13 @@ namespace GIGAServer.services
 
             Console.WriteLine("Tell everyone you're the new leader");
 
-            BroadcastAppendEntries(partition, null);
+            while (partition.Partition.RaftObject.State == 3)
+            {
+                BroadcastAppendEntries(partition, null);
+                Thread.Sleep(5000);
+            }
+
+            StartFollowerThread(partition);
         }
 
         public void BroadcastAppendEntries(GIGAPartition partition, GIGALogEntry entry)
@@ -161,13 +167,6 @@ namespace GIGAServer.services
                         }).Start();
                     }
                 }
-
-                bool cancelled = partition.Partition.RaftObject.TokenSource.Token.WaitHandle.WaitOne(5000);
-
-                CheckLeaderAlive(partition, cancelled);
-
-                if (cancelled || gigaServerService.Frozen)
-                    break;
             }
         }
 
