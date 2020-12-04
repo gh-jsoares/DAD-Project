@@ -30,16 +30,18 @@ namespace GIGAServer.domain
 
         internal void ShowStatus()
         {
-            Console.WriteLine("\tPartition \"{0}\":\n\t\tCurrent Master: {1}", Name, MasterServer.ToString());
+            if(MasterServer == null)
+                Console.WriteLine($"\tPartition \"{Name}\":\n\t\tCurrent Master: NO MASTER");
+            else
+                Console.WriteLine($"\tPartition \"{Name}\":\n\t\tCurrent Master: {MasterServer}");
             foreach (KeyValuePair<string, GIGAServerObject> entry in Servers)
             {
-                Console.WriteLine("\t\t{0}", entry.Value.ToString());
+                Console.WriteLine($"\t\t{entry.Value}");
             }
         }
 
         internal GIGALogEntry Read(string name)
         {
-            // TODO LOCKED
             return GetEntry(name);
         }
 

@@ -24,8 +24,15 @@ namespace GIGAServer.services
 
         public bool Status()
         {
-            gigaServerService.ShowStatus();
-            gigaPartitionService.ShowStatus();
+            try
+            {
+                gigaServerService.ShowStatus();
+                gigaPartitionService.ShowStatus();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
 
             return true;
         }
