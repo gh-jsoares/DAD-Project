@@ -18,7 +18,7 @@ namespace GIGAClient.Scripts.Commands
 
         void ICommand.SafeExecute(string[] Args, services.GIGAClientService service)
         {
-            int currentLoop = 0;
+            int currentLoop = 1;
             while (CommandExecutor.LoopCount > 0)
             {
                 foreach (KeyValuePair<ICommand, string[]> entry in CommandExecutor.LoopCommands)

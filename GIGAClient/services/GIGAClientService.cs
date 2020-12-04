@@ -200,6 +200,7 @@ namespace GIGAClient.services
                 }
                 catch (Exception e)
                 {
+                    Console.WriteLine(e);
                     retry = true;
 
                     if (currentServer != null)
@@ -240,11 +241,15 @@ namespace GIGAClient.services
 
                 var reply = client.ListServer(new ListServerRequest {ServerId = currentServer.Name});
 
-                Console.WriteLine("List of entries: Partition => Object");
+                Console.WriteLine($"Server '{serverId}'");
 
-                foreach (var item in reply.Objects)
+                foreach (var partition in reply.Partitions)
                 {
-                    Console.WriteLine($"{item.PartitionId} => {item.ObjectId} | Is Master: {item.IsMaster.ToString()}");
+                    Console.WriteLine($"\tPartition '{partition.PartitionId}' | Is Master {partition.IsMaster.ToString()}");
+                    foreach (var obj in partition.Objects)
+                    {
+                        Console.WriteLine($"\t\t'{obj.ObjectId}' => {obj.Value} | timestamp: {obj.Timestamp}");
+                    }
                 }
             }
             catch (Exception e)
@@ -266,38 +271,10 @@ namespace GIGAClient.services
 
         public void ListGlobal()
         {
-            var servers = enabledServers.ToImmutableDictionary();
-            foreach (var (id, url) in servers)
+            var servers = enabledServers.Keys.ToList();
+            foreach (var server in servers)
             {
-                try
-                {
-                    currentServer = new GIGAServerObject(id, url);
-                    AttemptToConnectToCurrentServer();
-
-                    var reply = client.ListGlobal(new ListGlobalRequest());
-
-                    Console.WriteLine($"Server: '{id}'");
-
-                    // TODO: Include value
-                    foreach (var item in reply.Objects)
-                        Console.WriteLine($"\t{item.PartitionId} => {item.ObjectId}");
-                }
-                catch (Exception e)
-                {
-                    if (currentServer != null)
-                    {
-                        RemoveCurrentPartitionServer();
-                    }
-
-                    if (enabledServers.Count == 0)
-                    {
-                        Console.WriteLine("No servers available.");
-                    }
-                }
-                finally
-                {
-                    channel?.ShutdownAsync()?.Wait();
-                }
+                ListServer(server);
             }
         }
 
@@ -325,7 +302,7 @@ namespace GIGAClient.services
 
         private void SelectServer(string serverId)
         {
-            if (enabledServers.ContainsKey(serverId) && currentPartition.HasServer(serverId))
+            if (serverId != null && enabledServers.ContainsKey(serverId) && currentPartition.HasServer(serverId))
                 currentServer = currentPartition.Servers[serverId];
         }
 

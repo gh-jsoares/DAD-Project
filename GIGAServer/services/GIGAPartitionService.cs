@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GIGAPartitionProto;
+using GIGAServerProto;
 
 namespace GIGAServer.services
 {
@@ -111,7 +112,7 @@ namespace GIGAServer.services
 
             Console.WriteLine("READ");
             if (!Partitions.ContainsKey(partitionId)) return null;
-            GIGAObject obj = Partitions[partitionId].Read(objectId);
+            var obj = Partitions[partitionId].Read(objectId);
 
             GigaServerService.PopFreezeQueue();
 
@@ -125,24 +126,6 @@ namespace GIGAServer.services
             {
                 entry.Value.ShowStatus();
             }
-        }
-
-        internal List<GIGAPartitionObjectID> ListObjects(string serverId)
-        {
-            CheckFrozenServer();
-
-            Console.WriteLine("LIST OBJECTS");
-
-            List<GIGAPartitionObjectID> result = new List<GIGAPartitionObjectID>();
-
-            foreach (GIGAPartition partition in Partitions.Values.Where(p => p.HasServer(serverId)))
-            {
-                result.AddRange(partition.GetPartitionObjectIDList());
-            }
-
-            GigaServerService.PopFreezeQueue();
-
-            return result;
         }
 
         internal KeyValuePair<bool, string> Write(string partitionId, string objectId, string value)
@@ -181,22 +164,17 @@ namespace GIGAServer.services
             return new KeyValuePair<bool, string>(true, "");
         }
 
-        internal List<GIGAPartitionObjectID> ListGlobal()
+        public List<GIGAPartition> ListPartitions()
         {
             CheckFrozenServer();
 
-            Console.WriteLine("LIST GLOBAL");
-            List<GIGAPartitionObjectID> result = new List<GIGAPartitionObjectID>();
+            Console.WriteLine("LIST SERVER");
 
-            foreach (GIGAPartition partition in Partitions.Values)
-            {
-                result.AddRange(partition.GetPartitionObjectIDList());
-            }
+            var result = Partitions.Values.ToList();
 
             GigaServerService.PopFreezeQueue();
 
             return result;
         }
-
     }
 }

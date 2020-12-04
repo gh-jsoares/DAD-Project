@@ -38,9 +38,9 @@ namespace GIGAServer.dto
             return Partition.Read(name);
         }
 
-        internal List<GIGAPartitionObjectID> GetPartitionObjectIDList()
+        internal List<GIGAObject> GetObjects()
         {
-            return Partition.GetPartitionObjectIDList();
+            return Partition.GetObjects();
         }
 
         internal bool HasServer(string serverId)

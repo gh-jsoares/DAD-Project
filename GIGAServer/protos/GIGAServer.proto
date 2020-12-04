@@ -6,7 +6,6 @@ service GIGAServerService {
 	rpc Read (ReadRequest) returns (ReadReply);
 	rpc Write (WriteRequest) returns (WriteReply);
 	rpc ListServer (ListServerRequest) returns (ListServerReply);
-	rpc ListGlobal (ListGlobalRequest) returns (ListGlobalReply);
 }
 
 /* Read Command */ 
@@ -35,25 +34,25 @@ message WriteReply{
 	string master_server = 2;
 }
 
-/* List Global Command */ 
-message ListGlobalRequest {
-}
-
-message ListGlobalReply {
-	repeated PartitionObjectID objects = 1;
-}
-
-message PartitionObjectID {
-	string partition_id = 1;
-	string object_id = 2;
-	bool is_master = 3;
-}
-
 /* List Server Command */
 message ListServerRequest {
 	string server_id = 1;
 }
 
 message ListServerReply {
-	repeated PartitionObjectID objects = 1;
+	repeated Partition partitions = 1;
 }
+
+message Partition {
+	string partition_id = 1;
+	repeated Object objects = 2;
+	bool is_master = 3;
+}
+
+message Object {
+	string object_id = 1;
+	string value = 2;
+	int32 timestamp = 3;
+}
+
+

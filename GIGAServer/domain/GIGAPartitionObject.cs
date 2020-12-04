@@ -30,7 +30,7 @@ namespace GIGAServer.domain
 
         internal void ShowStatus()
         {
-            if(MasterServer == null)
+            if (MasterServer == null)
                 Console.WriteLine($"\tPartition \"{Name}\":\n\t\tCurrent Master: NO MASTER");
             else
                 Console.WriteLine($"\tPartition \"{Name}\":\n\t\tCurrent Master: {MasterServer}");
@@ -58,9 +58,9 @@ namespace GIGAServer.domain
             return entry;
         }
 
-        internal List<GIGAPartitionObjectID> GetPartitionObjectIDList()
+        internal List<GIGAObject> GetObjects()
         {
-            return objects.Values.Select(obj => obj.ToPartitionObjectID()).ToList();
+            return objects.Values.ToList();
         }
 
         public GIGALogEntry GetEntry(string name)
@@ -141,6 +141,7 @@ namespace GIGAServer.domain
 
         public void CommitEntry(GIGALogEntry entry)
         {
+            entry.Data.Timestamp = entry.Index;
             simpleWrite(entry.Data);
             entry.Committed = true;
         }

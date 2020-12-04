@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Object = GIGAServerProto.Object;
 
 namespace GIGAServer.grpc
 {
@@ -64,23 +65,24 @@ namespace GIGAServer.grpc
         {
             ListServerReply reply = new ListServerReply();
 
-            reply.Objects.AddRange(gigaPartitionService.ListObjects(request.ServerId).Select(objectId =>
-                new PartitionObjectID
+            foreach (var partition in gigaPartitionService.ListPartitions())
+            {
+                reply.Partitions.Add(new Partition
                 {
-                    PartitionId = objectId.PartitionName,
-                    ObjectId = objectId.ObjectName,
-                    IsMaster = objectId.MasterServerName == gigaServerService.Server.Name
-                }));
-
-            return Task.FromResult(reply);
-        }
-
-        public override Task<ListGlobalReply> ListGlobal(ListGlobalRequest request, ServerCallContext context)
-        {
-            ListGlobalReply reply = new ListGlobalReply();
-
-            reply.Objects.AddRange(gigaPartitionService.ListGlobal().Select(objectId => new PartitionObjectID
-                {PartitionId = objectId.PartitionName, ObjectId = objectId.ObjectName}));
+                    PartitionId = partition.Partition.Name,
+                    IsMaster = partition.IsMaster(gigaServerService.Server),
+                    Objects =
+                    {
+                        partition.GetObjects().Select(obj => new Object
+                            {
+                                ObjectId = obj.Name,
+                                Value = obj.Value,
+                                Timestamp = obj.Timestamp
+                            }
+                        ).ToList()
+                    }
+                });
+            }
 
             return Task.FromResult(reply);
         }

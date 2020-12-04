@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace GIGAServer.domain
 {
@@ -20,11 +18,6 @@ namespace GIGAServer.domain
             Value = value ?? throw new ArgumentNullException(nameof(value));
             Locked = false;
             Timestamp = timestamp;
-        }
-
-        public GIGAPartitionObjectID ToPartitionObjectID()
-        {
-            return new GIGAPartitionObjectID(this);
         }
     }
 }
