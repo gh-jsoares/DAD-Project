@@ -49,6 +49,7 @@ namespace GIGAServer.services
         {
             Frozen = true;
             FreezeQueuePopEvent.Reset();
+            FreezeQueueHeartbeatPopEvent.Reset();
             return true;
         }
 

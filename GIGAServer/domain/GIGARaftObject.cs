@@ -99,11 +99,15 @@ namespace GIGAServer.domain
                    request.LastLogTerm >= partition.GetLastLogTerm();
         }
 
-        public void AcceptNewLeader(string serverId, GIGAPartitionObject partitionObject)
+        public void AcceptNewLeader(string serverId, int leaderTerm, GIGAPartitionObject partitionObject)
         {
-            partitionObject.SetNewMasterServer(serverId);
+            if(leaderTerm >= Term)
+            {
+                partitionObject.SetNewMasterServer(serverId);
 
-            ReturnToFollower();
+                ReturnToFollower();
+            }
+            
         }
 
         public void ReturnToFollower()

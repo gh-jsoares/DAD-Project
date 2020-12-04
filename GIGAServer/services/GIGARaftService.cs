@@ -149,7 +149,7 @@ namespace GIGAServer.services
             int successful = 0;
             Console.WriteLine(partition.PartitionMap.Count);
 
-            while (successful < Math.Ceiling(partition.PartitionMap.Count / 2.0))
+            while (successful < Math.Ceiling(partition.PartitionMap.Count / 2.0) && partition.Partition.RaftObject.State == 3)
             {
                 foreach (var partitionClient in partition.PartitionMap)
                 {

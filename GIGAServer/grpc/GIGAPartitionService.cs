@@ -51,7 +51,7 @@ namespace GIGAServer.grpc
 
             gigaPartitionService.CheckFrozenServerHeartbeat();
 
-            gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.AcceptNewLeader(request.ServerId,
+            gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.AcceptNewLeader(request.ServerId, request.Term,
                 gigaPartitionService.Partitions[request.PartitionId].Partition);
 
             gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.CheckTerm(request.Term);
@@ -94,7 +94,7 @@ namespace GIGAServer.grpc
                         new GIGAObject(partitionObject.Partition, request.Entry.ObjectId, request.Entry.Value));
 
 
-                partitionObject.Partition.RaftObject.AcceptNewLeader(request.ServerId, partitionObject.Partition);
+                partitionObject.Partition.RaftObject.AcceptNewLeader(request.ServerId, request.Term, partitionObject.Partition);
                 partitionObject.Partition.RaftObject.CheckTerm(request.Term);
 
                 var lastCommittedLog = partitionObject.Partition.AppendEntries(entry, lastCommittedEntries.ToList());
