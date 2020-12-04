@@ -1,11 +1,9 @@
-﻿using PuppetMaster.Commands;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
+using PuppetMaster.Commands;
 
 namespace PuppetMaster.Scripts.Commands
 {
-    class ReplicationFactorCommand : ICommand
+    internal class ReplicationFactorCommand : ICommand
     {
         public string Name => "ReplicationFactor";
 

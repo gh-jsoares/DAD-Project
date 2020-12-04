@@ -1,13 +1,9 @@
 ﻿using GIGAClient.Commands;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
 using GIGAClient.services;
 
 namespace GIGAClient.Scripts.Commands
 {
-    class WaitCommand : ICommand
+    internal class WaitCommand : ICommand
     {
         public string Name => "wait";
 
@@ -17,10 +13,10 @@ namespace GIGAClient.Scripts.Commands
 
         public int NumArgs => 1;
 
-        void ICommand.SafeExecute(string[] Args, services.GIGAClientService service)
+        void ICommand.SafeExecute(string[] Args, GIGAClientService service)
         {
             // TODO VALIDATE INT
-            int amount = int.Parse(Args[0]);
+            var amount = int.Parse(Args[0]);
             GIGAClientService.Wait(amount);
         }
     }

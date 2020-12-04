@@ -1,37 +1,28 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 using System.Windows.Forms;
 
 namespace PuppetMaster
 {
     public partial class Form1 : Form
     {
+        private readonly Queue<string> commandsList = new Queue<string>();
 
-        PuppetMasterLogic pml;
-
-        Queue<string> commandsList = new Queue<string>();
+        private readonly PuppetMasterLogic pml;
 
         public Form1()
         {
             InitializeComponent();
 
             pml = new PuppetMasterLogic();
-
         }
 
         private void FormShown(object sender, EventArgs e)
         {
-
             while (commandsList.Count > 0)
             {
-                string command = commandsList.Dequeue();
+                var command = commandsList.Dequeue();
                 tbCommandLog.AppendText(pml.SendCommand(command) + "\r\n");
             }
         }
@@ -39,28 +30,21 @@ namespace PuppetMaster
         private void btnSendCommand_Click(object sender, EventArgs e)
         {
             tbCommandLog.AppendText(pml.SendCommand(tbCommand.Text) + "\r\n");
-
         }
 
         private void btnSequence_Click(object sender, EventArgs e)
         {
-            string[] commands = System.IO.File.ReadAllLines(@"..\..\..\files\scripts\" + tbFileName.Text);
+            var commands = File.ReadAllLines(@"..\..\..\files\scripts\" + tbFileName.Text);
 
-            foreach(string c in commands)
-            {
-                tbCommandLog.AppendText(pml.SendCommand(c) + "\r\n");
-            }
+            foreach (var c in commands) tbCommandLog.AppendText(pml.SendCommand(c) + "\r\n");
         }
 
         private void btnStep_Click(object sender, EventArgs e)
         {
-            string[] commands = System.IO.File.ReadAllLines(@"..\..\..\files\scripts\" + tbFileName.Text);
+            var commands = File.ReadAllLines(@"..\..\..\files\scripts\" + tbFileName.Text);
 
             commandsList.Clear();
-            foreach (string command in commands)
-            {
-                commandsList.Enqueue(command);
-            }
+            foreach (var command in commands) commandsList.Enqueue(command);
 
             btnNextStep.Enabled = true;
             btnSequence.Enabled = false;
@@ -69,19 +53,16 @@ namespace PuppetMaster
 
         private void btnNextStep_Click(object sender, EventArgs e)
         {
-
-            string command = commandsList.Dequeue();
+            var command = commandsList.Dequeue();
 
             tbCommandLog.AppendText(pml.SendCommand(command) + "\r\n");
 
-            if(commandsList.Count == 0)
+            if (commandsList.Count == 0)
             {
                 btnNextStep.Enabled = false;
                 btnSequence.Enabled = true;
                 btnStep.Enabled = true;
             }
-                
-
         }
     }
 }

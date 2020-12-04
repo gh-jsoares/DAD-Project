@@ -21,12 +21,12 @@ namespace GIGAServer.dto
                             GrpcChannel.ForAddress(server.Url)));
         }
 
-        public GIGAServerObject Master() => Partition.MasterServer;
-
         internal GIGAPartitionObject Partition { get; set; }
 
         public Dictionary<string, GIGAPartitionService.GIGAPartitionServiceClient> PartitionMap { get; set; } =
             new Dictionary<string, GIGAPartitionService.GIGAPartitionServiceClient>();
+
+        public GIGAServerObject Master() => Partition.MasterServer;
 
         internal void ShowStatus()
         {

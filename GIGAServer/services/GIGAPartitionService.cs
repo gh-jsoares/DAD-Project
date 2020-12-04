@@ -1,26 +1,24 @@
-﻿using GIGAServer.domain;
-using GIGAServer.dto;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
-using GIGAPartitionProto;
-using GIGAServerProto;
+using GIGAServer.domain;
+using GIGAServer.dto;
 
 namespace GIGAServer.services
 {
-    class GIGAPartitionService
+    internal class GIGAPartitionService
     {
-        public int ReplicationFactor { get; set; }
-        internal Dictionary<string, GIGAPartition> Partitions { get; set; } = new Dictionary<string, GIGAPartition>();
-        internal GIGAServerService GigaServerService { get; set; }
         private GIGARaftService gigaRaftService;
 
         public GIGAPartitionService(GIGAServerService gigaServerService)
         {
-            this.GigaServerService = gigaServerService;
+            GigaServerService = gigaServerService;
         }
+
+        public int ReplicationFactor { get; set; }
+        internal Dictionary<string, GIGAPartition> Partitions { get; set; } = new Dictionary<string, GIGAPartition>();
+        internal GIGAServerService GigaServerService { get; set; }
 
         public void InitRaftService(GIGARaftService raftService)
         {
@@ -29,7 +27,7 @@ namespace GIGAServer.services
 
         public void CheckFrozenServer()
         {
-            Random random = new Random();
+            var random = new Random();
 
             // ADD RANDOM DELAY BETWEEN MIN AND MAX
             Thread.Sleep(random.Next(GigaServerService.MinDelay, GigaServerService.MaxDelay));
@@ -39,7 +37,7 @@ namespace GIGAServer.services
             if (GigaServerService.FreezeQueue.Count > 0 || GigaServerService.Frozen)
                 GigaServerService.FreezeQueue.Enqueue(Thread.CurrentThread.Name);
 
-            while(GigaServerService.FreezeQueue.Count > 0)
+            while (GigaServerService.FreezeQueue.Count > 0)
             {
                 GigaServerService.FreezeQueuePopEvent.WaitOne();
                 if (Thread.CurrentThread.Name == GigaServerService.FreezePoppedQueue) break;
@@ -52,7 +50,7 @@ namespace GIGAServer.services
 
         public void CheckFrozenServerHeartbeat()
         {
-            Random random = new Random();
+            var random = new Random();
 
             // ADD RANDOM DELAY BETWEEN MIN AND MAX
             Thread.Sleep(random.Next(GigaServerService.MinDelay, GigaServerService.MaxDelay));
@@ -80,12 +78,12 @@ namespace GIGAServer.services
 
         public void CheckWriteServer()
         {
-            Random random = new Random();
+            var random = new Random();
 
             if (GigaServerService.WriteQueue.Count > 0 || GigaServerService.IsWriting)
                 GigaServerService.WriteQueue.Enqueue(Thread.CurrentThread.Name);
 
-            while(GigaServerService.WriteQueue.Count > 0)
+            while (GigaServerService.WriteQueue.Count > 0)
             {
                 GigaServerService.WriteQueuePopEvent.WaitOne();
                 if (Thread.CurrentThread.Name == GigaServerService.WritePoppedQueue) break;
@@ -122,19 +120,16 @@ namespace GIGAServer.services
         internal void ShowStatus()
         {
             Console.WriteLine("Current Partitions:");
-            foreach (KeyValuePair<string, GIGAPartition> entry in Partitions)
-            {
-                entry.Value.ShowStatus();
-            }
+            foreach (var entry in Partitions) entry.Value.ShowStatus();
         }
 
         internal KeyValuePair<bool, string> Write(string partitionId, string objectId, string value)
         {
             CheckFrozenServer();
-            
+
             Console.WriteLine("WRITE");
 
-            GIGAPartition partition = Partitions[partitionId];
+            var partition = Partitions[partitionId];
             if (!partition.IsMaster(GigaServerService.Server))
             {
                 Console.WriteLine(partition.GetMaster());
@@ -143,19 +138,16 @@ namespace GIGAServer.services
             }
 
             // wait for raft service to startup
-            while (gigaRaftService == null)
-            {
-                Thread.Sleep(100);
-            }
+            while (gigaRaftService == null) Thread.Sleep(100);
 
             CheckWriteServer();
             GigaServerService.IsWriting = true;
             var entry = partition.Partition.CreateLog(objectId, value);
             gigaRaftService.BroadcastAppendEntries(partition, entry);
-            
+
             // Commit entry and replace read value
             partition.Partition.CommitEntry(entry);
-            
+
             GigaServerService.IsWriting = false;
 
             GigaServerService.PopWriteQueue();

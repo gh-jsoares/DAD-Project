@@ -1,17 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace PuppetMaster.Commands
 {
-    interface ICommand
+    internal interface ICommand
     {
         string Name { get; }
         string Syntax { get; }
         string Description { get; }
         int NumArgs { get; }
 
-        public string Execute( string[] Args, PuppetMasterLogic PuppetMaster)
+        public string Execute(string[] Args, PuppetMasterLogic PuppetMaster)
         {
             ValidadeArgs(Args);
             SafeExecute(Args, PuppetMaster);
@@ -21,10 +19,8 @@ namespace PuppetMaster.Commands
         protected void ValidadeArgs(string[] Args)
         {
             if (Args.Length < NumArgs)
-            {
                 // throw custom exception
                 throw new Exception(string.Format("Missing arguments. Syntax: {0} {1}", Name, Syntax));
-            }
         }
 
         protected void SafeExecute(string[] Args, PuppetMasterLogic PuppetMaster);

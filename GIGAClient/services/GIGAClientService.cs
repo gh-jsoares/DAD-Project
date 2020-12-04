@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using GIGAClient.domain;
@@ -12,13 +11,13 @@ namespace GIGAClient.services
     internal class GIGAClientService
     {
         private static readonly Random random = new Random();
+        private readonly List<string> enabledPartitions;
+        private readonly Dictionary<string, string> enabledServers;
+        private readonly GIGAClientObject gigaClientObject;
         private GrpcChannel channel;
         private GIGAServerService.GIGAServerServiceClient client;
         private GIGAPartitionObject currentPartition;
         private GIGAServerObject currentServer;
-        private readonly List<string> enabledPartitions;
-        private readonly Dictionary<string, string> enabledServers;
-        private readonly GIGAClientObject gigaClientObject;
 
         public GIGAClientService(string name, string url, string file)
         {
@@ -36,10 +35,8 @@ namespace GIGAClient.services
 
             enabledPartitions.Add(partitionName);
             foreach (var server in servers)
-            {
                 if (!enabledServers.ContainsKey(server.Name))
                     enabledServers.Add(server.Name, server.Url);
-            }
 
             return true;
         }
@@ -59,20 +56,12 @@ namespace GIGAClient.services
                         return;
                     }
 
-                    if (currentPartition == null || currentPartition.Name != partitionId)
-                    {
-                        SelectPartition(partitionId);
-                    }
+                    if (currentPartition == null || currentPartition.Name != partitionId) SelectPartition(partitionId);
 
-                    if (masterServer != null)
-                    {
-                        SelectServer(masterServer);
-                    }
+                    if (masterServer != null) SelectServer(masterServer);
 
                     if (currentServer == null || !currentPartition.HasServer(currentServer.Name))
-                    {
                         SelectRandomServerFromPartition();
-                    }
 
                     AttemptToConnectToCurrentServer();
 
@@ -101,10 +90,7 @@ namespace GIGAClient.services
                 {
                     retry = true;
 
-                    if (currentServer != null)
-                    {
-                        RemoveCurrentPartitionServer();
-                    }
+                    if (currentServer != null) RemoveCurrentPartitionServer();
 
                     if (enabledServers.Count == 0)
                     {
@@ -152,9 +138,7 @@ namespace GIGAClient.services
                     }
 
                     if (currentServer == null || !currentPartition.HasServer(currentServer.Name))
-                    {
                         SelectServer(nextServer);
-                    }
 
                     if (currentServer != null)
                     {
@@ -198,15 +182,11 @@ namespace GIGAClient.services
                         }
                     }
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
-                    Console.WriteLine(e);
                     retry = true;
 
-                    if (currentServer != null)
-                    {
-                        RemoveCurrentPartitionServer();
-                    }
+                    if (currentServer != null) RemoveCurrentPartitionServer();
 
                     if (enabledServers.Count == 0)
                     {
@@ -231,9 +211,7 @@ namespace GIGAClient.services
             }
 
             if (currentServer == null || currentServer.Name != serverId)
-            {
                 currentServer = new GIGAServerObject(serverId, enabledServers[serverId]);
-            }
 
             try
             {
@@ -245,11 +223,10 @@ namespace GIGAClient.services
 
                 foreach (var partition in reply.Partitions)
                 {
-                    Console.WriteLine($"\tPartition '{partition.PartitionId}' | Is Master {partition.IsMaster.ToString()}");
+                    Console.WriteLine(
+                        $"\tPartition '{partition.PartitionId}' | Is Master {partition.IsMaster.ToString()}");
                     foreach (var obj in partition.Objects)
-                    {
                         Console.WriteLine($"\t\t'{obj.ObjectId}' => {obj.Value} | timestamp: {obj.Timestamp}");
-                    }
                 }
             }
             catch (Exception e)
@@ -272,10 +249,7 @@ namespace GIGAClient.services
         public void ListGlobal()
         {
             var servers = enabledServers.Keys.ToList();
-            foreach (var server in servers)
-            {
-                ListServer(server);
-            }
+            foreach (var server in servers) ListServer(server);
         }
 
         private void AttemptToConnectToCurrentServer()

@@ -2,13 +2,8 @@
 
 namespace GIGAPuppetMaster.domain
 {
-    class GIGAServerObject
+    internal class GIGAServerObject
     {
-        public string Name { get; }
-        public string Url { get; }
-        public int MinDelay { get; }
-        public int MaxDelay { get; }
-
         public GIGAServerObject(string name, string url, int minDelay, int maxDelay)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
@@ -16,5 +11,10 @@ namespace GIGAPuppetMaster.domain
             MinDelay = minDelay;
             MaxDelay = maxDelay;
         }
+
+        public string Name { get; }
+        public string Url { get; }
+        public int MinDelay { get; }
+        public int MaxDelay { get; }
     }
 }

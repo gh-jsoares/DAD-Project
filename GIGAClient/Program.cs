@@ -1,39 +1,43 @@
-﻿using GIGAClient.Commands;
-using GIGAClient.Scripts.Commands;
-using Grpc.Core;
-using System;
+﻿using System;
+using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
+using GIGAClient.Commands;
+using GIGAClient.services;
+using Grpc.Core;
 
 namespace GIGAClient
 {
-    class Program
+    internal class Program
     {
         private static CommandExecutor commands;
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
             //When client is initiated with a PuppetMaster command
             if (args.Length == 3)
             {
-                string name = args[0];
-                string url = args[1];
-                string file = args[2];
+                var name = args[0];
+                var url = args[1];
+                var file = args[2];
 
 
                 Console.WriteLine($"Client created with arguments: {args[0]} {args[1]} {args[2]}");
-                services.GIGAClientService gigaClientService = new services.GIGAClientService(name, url, file);
-                services.GIGAPuppetMasterService gigaPuppetMasterService = new services.GIGAPuppetMasterService(gigaClientService);
+                var gigaClientService = new GIGAClientService(name, url, file);
+                var gigaPuppetMasterService = new GIGAPuppetMasterService(gigaClientService);
                 commands = new CommandExecutor(gigaClientService);
 
-                Uri uri = new Uri(url);
+                var uri = new Uri(url);
 
-                Server server = new Server
+                var server = new Server
                 {
-                    Services = { GIGAPuppetMasterProto.GIGAPuppetMasterService.BindService(new grpc.GIGAPuppetMasterService(gigaPuppetMasterService)) },
-                    Ports = { new ServerPort(uri.Host, uri.Port, ServerCredentials.Insecure) }
+                    Services =
+                    {
+                        GIGAPuppetMasterProto.GIGAPuppetMasterService.BindService(
+                            new grpc.GIGAPuppetMasterService(gigaPuppetMasterService))
+                    },
+                    Ports = {new ServerPort(uri.Host, uri.Port, ServerCredentials.Insecure)}
                 };
 
                 server.Start();
@@ -41,21 +45,21 @@ namespace GIGAClient
 
 
                 //Ler script
-                
+
                 try
                 {
                     Console.WriteLine("Waiting for partition to register");
-                    string[] scriptCommands = System.IO.File.ReadAllLines(@"..\..\..\..\GIGAClient\files\scripts\" + file);
+                    var scriptCommands = File.ReadAllLines(@"..\..\..\..\GIGAClient\files\scripts\" + file);
 
                     Thread.Sleep(2000);
 
-                    foreach (string s in scriptCommands)
+                    foreach (var s in scriptCommands)
                     {
                         Console.WriteLine(s);
                         commands.Run(s);
                     }
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     Console.WriteLine(e.Message);
                 }
@@ -69,7 +73,6 @@ namespace GIGAClient
                     Console.WriteLine("...");
                     commands.Run(command);
                 }
-
             }
 
             Console.ReadLine();

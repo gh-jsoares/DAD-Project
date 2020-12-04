@@ -1,18 +1,17 @@
-﻿using Grpc.Net.Client;
-using PuppetMaster.Commands;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Diagnostics;
+using PuppetMaster.Commands;
 
 namespace PuppetMaster.Scripts.Commands
 {
-    class ClientCommand : ICommand
+    internal class ClientCommand : ICommand
     {
         public string Name => "Client";
 
         public string Syntax => "username client_URL script_file";
 
-        public string Description => "This command creates a client process identified by the string username, available at client_URL and that will execute the commands in the script file script_file";
+        public string Description =>
+            "This command creates a client process identified by the string username, available at client_URL and that will execute the commands in the script file script_file";
 
         public int NumArgs => 3;
 
@@ -21,12 +20,9 @@ namespace PuppetMaster.Scripts.Commands
             Console.WriteLine(Args.Length);
 
             //Create process with given arguments
-            ProcessStartInfo startInfo = new ProcessStartInfo();
+            var startInfo = new ProcessStartInfo();
             startInfo.FileName = @"..\..\..\..\GIGAClient\bin\Debug\netcoreapp3.1\GIGAClient.exe";
-            foreach (string arg in Args)
-            {
-                startInfo.Arguments += $"{arg} ";
-            }
+            foreach (var arg in Args) startInfo.Arguments += $"{arg} ";
             startInfo.UseShellExecute = true;
             startInfo.CreateNoWindow = false;
             startInfo.WindowStyle = ProcessWindowStyle.Normal;

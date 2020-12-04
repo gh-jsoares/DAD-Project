@@ -1,19 +1,23 @@
-﻿using GIGAServer.domain;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Dynamic;
-using System.Runtime.Intrinsics.X86;
-using System.Text;
 using System.Threading;
+using GIGAServer.domain;
 
 namespace GIGAServer.services
 {
-    class GIGAServerService
+    internal class GIGAServerService
     {
+        public GIGAServerService(string id, string hostname, int port, int minDelay, int maxDelay)
+        {
+            MinDelay = minDelay;
+            MaxDelay = maxDelay;
+            Server = new GIGAServerObject(id, string.Format("http://{0}:{1}", hostname, port));
+        }
+
         public GIGAServerObject Server { get; }
         public int ReplicationFactor { get; set; }
-        public bool Frozen { get; private set; } = false;
+        public bool Frozen { get; private set; }
         public bool IsWriting { get; set; } = false;
         public int MinDelay { get; }
         public int MaxDelay { get; }
@@ -29,18 +33,11 @@ namespace GIGAServer.services
         public string WritePoppedQueue { get; private set; } = "";
         public ManualResetEvent WriteQueuePopEvent { get; } = new ManualResetEvent(false);
 
-        public GIGAServerService(string id, string hostname, int port, int minDelay, int maxDelay)
-        {
-            MinDelay = minDelay;
-            MaxDelay = maxDelay;
-            Server = new GIGAServerObject(id, string.Format("http://{0}:{1}", hostname, port));
-        }
-        
         public bool Unfreeze()
         {
             Frozen = false;
             PopFreezeQueue();
-            while(FreezeQueueHeartbeat.Count != 0)
+            while (FreezeQueueHeartbeat.Count != 0)
                 PopFreezeQueueHeartbeat();
             return true;
         }

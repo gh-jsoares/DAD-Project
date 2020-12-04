@@ -1,22 +1,14 @@
-﻿using GIGAServer.domain;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using GIGAPartitionProto;
 
 namespace GIGAServer.domain
 {
-    class GIGAPartitionObject
+    internal class GIGAPartitionObject
     {
-        public string Name { get; }
-        public Dictionary<string, GIGAServerObject> Servers { get; }
-        public int ReplicationFactor { get; }
-        public GIGAServerObject MasterServer { get; set; }
-        internal GIGARaftObject RaftObject { get; set; }
+        private readonly List<GIGALogEntry> log;
 
-        private Dictionary<string, GIGAObject> objects;
-        private List<GIGALogEntry> log;
+        private readonly Dictionary<string, GIGAObject> objects;
 
         public GIGAPartitionObject(string name, int replicationFactor, GIGAServerObject[] servers)
         {
@@ -28,16 +20,19 @@ namespace GIGAServer.domain
             log = new List<GIGALogEntry>();
         }
 
+        public string Name { get; }
+        public Dictionary<string, GIGAServerObject> Servers { get; }
+        public int ReplicationFactor { get; }
+        public GIGAServerObject MasterServer { get; set; }
+        internal GIGARaftObject RaftObject { get; set; }
+
         internal void ShowStatus()
         {
             if (MasterServer == null)
                 Console.WriteLine($"\tPartition \"{Name}\":\n\t\tCurrent Master: NO MASTER");
             else
                 Console.WriteLine($"\tPartition \"{Name}\":\n\t\tCurrent Master: {MasterServer}");
-            foreach (KeyValuePair<string, GIGAServerObject> entry in Servers)
-            {
-                Console.WriteLine($"\t\t{entry.Value}");
-            }
+            foreach (var entry in Servers) Console.WriteLine($"\t\t{entry.Value}");
         }
 
         internal GIGAObject Read(string name)
@@ -81,19 +76,17 @@ namespace GIGAServer.domain
         //Raft
         public void CreateRaftObject()
         {
-            this.RaftObject = new GIGARaftObject(Servers);
+            RaftObject = new GIGARaftObject(Servers);
         }
 
         public void SetNewMasterServer(string serverId)
         {
             foreach (var server in Servers)
-            {
                 if (server.Value.Name == serverId)
                 {
                     MasterServer = server.Value;
                     break;
                 }
-            }
 
             Console.WriteLine($"New master server is {serverId}");
         }
@@ -130,13 +123,9 @@ namespace GIGAServer.domain
         private void simpleWrite(GIGAObject obj)
         {
             if (objects.ContainsKey(obj.Name))
-            {
                 objects[obj.Name] = obj;
-            }
             else
-            {
                 objects.Add(obj.Name, obj);
-            }
         }
 
         public void CommitEntry(GIGALogEntry entry)
@@ -157,9 +146,7 @@ namespace GIGAServer.domain
                     var receivedLastCommitted = lastCommittedEntries.First();
                     if (lastCommitted.Term != receivedLastCommitted.Term ||
                         lastCommitted.Index != receivedLastCommitted.Index)
-                    {
                         return lastCommitted;
-                    }
 
                     // I have inconsistent logs, but ive received the correct ones, so ill apply them
                     var lastIndex = log.FindIndex(logEntry
@@ -167,10 +154,7 @@ namespace GIGAServer.domain
                     log.RemoveRange(lastIndex, log.Count() - lastIndex);
                 }
 
-                foreach (var lastCommittedEntry in lastCommittedEntries)
-                {
-                    CommitEntry(lastCommittedEntry);
-                }
+                foreach (var lastCommittedEntry in lastCommittedEntries) CommitEntry(lastCommittedEntry);
             }
 
             // Finally, add the current entry

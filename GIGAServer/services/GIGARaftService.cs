@@ -1,18 +1,15 @@
-﻿using GIGAServer.domain;
-using GIGAServer.dto;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Threading;
-using System.Threading.Tasks;
+using GIGAServer.domain;
+using GIGAServer.dto;
 
 namespace GIGAServer.services
 {
-    class GIGARaftService
+    internal class GIGARaftService
     {
         private GIGAPartitionService gigaPartitionService;
 
-        private GIGAServerService gigaServerService;
+        private readonly GIGAServerService gigaServerService;
 
         public GIGARaftService(GIGAPartitionService gigaPartitionService, GIGAServerService gigaServerService)
         {
@@ -22,8 +19,8 @@ namespace GIGAServer.services
             this.gigaPartitionService = gigaPartitionService;
             this.gigaServerService = gigaServerService;
 
-            Random rnd = new Random();
-            foreach (KeyValuePair<string, GIGAPartition> partition in gigaPartitionService.Partitions)
+            var rnd = new Random();
+            foreach (var partition in gigaPartitionService.Partitions)
             {
                 if (partition.Value.Partition.HasServer(gigaServerService.Server.Name))
                 {
@@ -42,7 +39,7 @@ namespace GIGAServer.services
         {
             Console.WriteLine($"Thread for partition {partition.Partition.Name} started");
 
-            bool cancelled =
+            var cancelled =
                 partition.Partition.RaftObject.TokenSource.Token.WaitHandle.WaitOne(partition.Partition.RaftObject
                     .Timeout);
 
@@ -68,7 +65,7 @@ namespace GIGAServer.services
                 {
                     Console.WriteLine($"Sent vote for partition {partition.Partition.Name}");
 
-                    Thread sendVoteThread = new Thread(() =>
+                    var sendVoteThread = new Thread(() =>
                         partition.SendVoteRequest(gigaServerService.Server.Name, partitionClient.Key,
                             partitionClient.Value));
                     sendVoteThread.Start();
@@ -79,8 +76,8 @@ namespace GIGAServer.services
             //Election Timeout
 
             partition.Partition.RaftObject.electionTimeout = false;
-            CancellationTokenSource timeoutToken = new CancellationTokenSource();
-            Thread electionTimeout = new Thread(() => ElectionTimeoutThread(partition, timeoutToken));
+            var timeoutToken = new CancellationTokenSource();
+            var electionTimeout = new Thread(() => ElectionTimeoutThread(partition, timeoutToken));
             electionTimeout.Start();
 
 
@@ -122,7 +119,7 @@ namespace GIGAServer.services
         public void StartFollowerThread(GIGAPartition partition)
         {
             partition.Partition.RaftObject.ReturnToFollower();
-            Thread initState = new Thread(() => FollowerState(partition));
+            var initState = new Thread(() => FollowerState(partition));
             initState.Start();
         }
 
@@ -146,10 +143,11 @@ namespace GIGAServer.services
 
         public void BroadcastAppendEntries(GIGAPartition partition, GIGALogEntry entry)
         {
-            int successful = 0;
+            var successful = 0;
             Console.WriteLine(partition.PartitionMap.Count);
 
-            while (successful < Math.Ceiling(partition.PartitionMap.Count / 2.0) && partition.Partition.RaftObject.State == 3)
+            while (successful < Math.Ceiling(partition.PartitionMap.Count / 2.0) &&
+                   partition.Partition.RaftObject.State == 3)
             {
                 foreach (var partitionClient in partition.PartitionMap)
                 {
@@ -176,7 +174,7 @@ namespace GIGAServer.services
         {
             partition.Partition.RaftObject.ResetTimeout(); //Set new timeout
 
-            bool cancelled = timeoutToken.Token.WaitHandle.WaitOne(partition.Partition.RaftObject.Timeout);
+            var cancelled = timeoutToken.Token.WaitHandle.WaitOne(partition.Partition.RaftObject.Timeout);
 
             if (!cancelled)
             {

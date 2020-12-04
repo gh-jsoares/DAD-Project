@@ -1,12 +1,10 @@
-﻿using Grpc.Net.Client;
+﻿using GIGAPuppetMasterProto;
+using Grpc.Net.Client;
 using PuppetMaster.Commands;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace PuppetMaster.Scripts.Commands
 {
-    class CrashCommand : ICommand
+    internal class CrashCommand : ICommand
     {
         public string Name => "Crash";
 
@@ -18,12 +16,12 @@ namespace PuppetMaster.Scripts.Commands
 
         void ICommand.SafeExecute(string[] Args, PuppetMasterLogic PuppetMaster)
         {
-            string url = PuppetMaster.ServerMap[Args[0]].Url;
+            var url = PuppetMaster.ServerMap[Args[0]].Url;
 
-            GrpcChannel channel = GrpcChannel.ForAddress(url);
-            GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient client = new GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient(channel);
+            var channel = GrpcChannel.ForAddress(url);
+            var client = new GIGAPuppetMasterService.GIGAPuppetMasterServiceClient(channel);
 
-            GIGAPuppetMasterProto.CrashServerReply reply = client.CrashServerService(new GIGAPuppetMasterProto.CrashServerRequest());
+            var reply = client.CrashServerService(new CrashServerRequest());
 
             PuppetMaster.ServerMap.Remove(Args[0]);
         }

@@ -1,16 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace GIGAClient.domain
 {
-    class GIGAPartitionObject
+    internal class GIGAPartitionObject
     {
-        public string Name { get; }
-        public Dictionary<string, GIGAServerObject> Servers { get; }
-        public int ReplicationFactor { get; }
-
         public GIGAPartitionObject(string name, int replicationFactor, GIGAServerObject[] servers)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
@@ -19,18 +14,19 @@ namespace GIGAClient.domain
             Servers = servers.ToDictionary(server => server.Name, server => server);
         }
 
+        public string Name { get; }
+        public Dictionary<string, GIGAServerObject> Servers { get; }
+        public int ReplicationFactor { get; }
+
         internal void ShowStatus()
         {
             Console.WriteLine("\tPartition \"{0}\":", Name);
-            foreach (GIGAServerObject server in Servers.Values)
-            {
-                Console.WriteLine("\t\t{0}", server.ToString());
-            }
+            foreach (var server in Servers.Values) Console.WriteLine("\t\t{0}", server);
         }
 
         internal GIGAServerObject GetRandomServer()
         {
-            Random random = new Random();
+            var random = new Random();
             return Servers.Values.ElementAt(random.Next(Servers.Count));
         }
 

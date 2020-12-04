@@ -1,11 +1,9 @@
 ﻿using GIGAClient.Commands;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using GIGAClient.services;
 
 namespace GIGAClient.Scripts.Commands
 {
-    class ListGlobalCommand : ICommand
+    internal class ListGlobalCommand : ICommand
     {
         public string Name => "listGlobal";
 
@@ -15,7 +13,7 @@ namespace GIGAClient.Scripts.Commands
 
         public int NumArgs => 0;
 
-        void ICommand.SafeExecute(string[] Args, services.GIGAClientService service)
+        void ICommand.SafeExecute(string[] Args, GIGAClientService service)
         {
             service.ListGlobal();
         }

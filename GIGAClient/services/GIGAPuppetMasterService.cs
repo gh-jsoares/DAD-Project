@@ -1,17 +1,14 @@
 ﻿using GIGAClient.domain;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace GIGAClient.services
 {
-    class GIGAPuppetMasterService
+    internal class GIGAPuppetMasterService
     {
-        private GIGAClientService gigaClientService;
+        private readonly GIGAClientService gigaClientService;
 
         public GIGAPuppetMasterService(GIGAClientService GIGAClientService)
         {
-            this.gigaClientService = GIGAClientService;
+            gigaClientService = GIGAClientService;
         }
 
         public bool Partition(int replicationFactor, string partitionName, GIGAServerObject[] servers)
@@ -23,6 +20,5 @@ namespace GIGAClient.services
         {
             gigaClientService.ShowStatus();
         }
-      
     }
 }

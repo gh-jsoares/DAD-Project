@@ -1,40 +1,36 @@
-﻿using GIGAClient.Commands;
-using GIGAClient.domain;
-using Grpc.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using System.Threading.Tasks;
+using GIGAClient.domain;
+using GIGAPuppetMasterProto;
+using Grpc.Core;
 
 namespace GIGAClient.grpc
 {
-    class GIGAPuppetMasterService : GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceBase
+    internal class GIGAPuppetMasterService : GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceBase
     {
-        private services.GIGAPuppetMasterService gigaPuppetMasterService;
+        private readonly services.GIGAPuppetMasterService gigaPuppetMasterService;
 
-    
+
         public GIGAPuppetMasterService(services.GIGAPuppetMasterService gigaPuppetMasterService)
         {
             this.gigaPuppetMasterService = gigaPuppetMasterService;
         }
 
-        public override Task<GIGAPuppetMasterProto.StatusReply> StatusService(GIGAPuppetMasterProto.StatusRequest request, ServerCallContext context)
+        public override Task<StatusReply> StatusService(StatusRequest request, ServerCallContext context)
         {
             gigaPuppetMasterService.Status();
-            return Task.FromResult(new GIGAPuppetMasterProto.StatusReply { Ok = true });
+            return Task.FromResult(new StatusReply {Ok = true});
         }
 
 
-        public override Task<GIGAPuppetMasterProto.PartitionReply> PartitionService(GIGAPuppetMasterProto.PartitionRequest request, ServerCallContext context)
+        public override Task<PartitionReply> PartitionService(PartitionRequest request, ServerCallContext context)
         {
-            int replicationFactor = request.ReplicationFactor;
-            string partitionName = request.PartitionId;
-            GIGAServerObject[] servers = request.Servers.Select(server => new GIGAServerObject(server.Id, server.Url)).ToArray();
+            var replicationFactor = request.ReplicationFactor;
+            var partitionName = request.PartitionId;
+            var servers = request.Servers.Select(server => new GIGAServerObject(server.Id, server.Url)).ToArray();
 
-            return Task.FromResult(new GIGAPuppetMasterProto.PartitionReply { Ok = gigaPuppetMasterService.Partition(replicationFactor, partitionName, servers) });
+            return Task.FromResult(new PartitionReply
+                {Ok = gigaPuppetMasterService.Partition(replicationFactor, partitionName, servers)});
         }
-
-       
     }
 }

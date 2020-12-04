@@ -1,12 +1,10 @@
-﻿using GIGAClient.Commands;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
+using GIGAClient.Commands;
+using GIGAClient.services;
 
 namespace GIGAClient.Scripts.Commands
 {
-    class EndRepeatCommand : ICommand
+    internal class EndRepeatCommand : ICommand
     {
         public string Name => "end-repeat";
 
@@ -16,14 +14,14 @@ namespace GIGAClient.Scripts.Commands
 
         public int NumArgs => 0;
 
-        void ICommand.SafeExecute(string[] Args, services.GIGAClientService service)
+        void ICommand.SafeExecute(string[] Args, GIGAClientService service)
         {
-            int currentLoop = 1;
+            var currentLoop = 1;
             while (CommandExecutor.LoopCount > 0)
             {
-                foreach (KeyValuePair<ICommand, string[]> entry in CommandExecutor.LoopCommands)
+                foreach (var entry in CommandExecutor.LoopCommands)
                 {
-                    string[] args = entry.Value.Select(arg => arg.Replace("$i", currentLoop.ToString())).ToArray();
+                    var args = entry.Value.Select(arg => arg.Replace("$i", currentLoop.ToString())).ToArray();
                     entry.Key.Execute(args, service);
                 }
 

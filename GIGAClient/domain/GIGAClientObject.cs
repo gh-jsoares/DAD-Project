@@ -1,23 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Transactions;
-using GIGAClient.Commands;
-using GIGAClient.services;
-using Grpc.Core;
 
 namespace GIGAClient.domain
 {
-    class GIGAClientObject
+    internal class GIGAClientObject
     {
-        public Dictionary<string, string> ServerMap { get; } = new Dictionary<string, string>();
-        public Dictionary<string, GIGAPartitionObject> PartitionMap { get; } = new Dictionary<string, GIGAPartitionObject>();
-        public string Username { get; }
-        public string Url { get; }
-        public string File { get; }
-        public string AttachedServer { get; }
-
         public GIGAClientObject(string username, string url, string file)
         {
             Username = username ?? throw new ArgumentNullException(nameof(username));
@@ -26,26 +14,33 @@ namespace GIGAClient.domain
             AttachedServer = null;
         }
 
+        public Dictionary<string, string> ServerMap { get; } = new Dictionary<string, string>();
+
+        public Dictionary<string, GIGAPartitionObject> PartitionMap { get; } =
+            new Dictionary<string, GIGAPartitionObject>();
+
+        public string Username { get; }
+        public string Url { get; }
+        public string File { get; }
+        public string AttachedServer { get; }
+
         internal void ShowStatus()
         {
             Console.WriteLine("Client: \"{0}\" @ {1}", Username, Url);
             Console.WriteLine("Current Partitions:");
-            foreach (GIGAPartitionObject partition in PartitionMap.Values)
-            {
-                partition.ShowStatus();
-            }
+            foreach (var partition in PartitionMap.Values) partition.ShowStatus();
         }
 
         internal GIGAPartitionObject GetRandomPartitionForServer(string serverId)
         {
-            List<GIGAPartitionObject> partitions = PartitionMap.Values.Where(p => p.HasServer(serverId)).ToList();
-            Random random = new Random();
+            var partitions = PartitionMap.Values.Where(p => p.HasServer(serverId)).ToList();
+            var random = new Random();
             return partitions.ElementAt(random.Next(partitions.Count));
         }
 
         internal GIGAPartitionObject GetRandomPartition()
         {
-            Random random = new Random();
+            var random = new Random();
             return PartitionMap.Values.ElementAt(random.Next(PartitionMap.Count));
         }
     }

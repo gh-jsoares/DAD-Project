@@ -1,33 +1,21 @@
-﻿using GIGAPartitionProto;
-using GIGAServer.domain;
-using GIGAServer.services;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
+using GIGAPartitionProto;
 
 namespace GIGAServer.domain
 {
-    class GIGARaftObject
+    internal class GIGARaftObject
     {
-        const int minTimeout = 10000;
-        const int maxTimeout = 20000;
-
-        public int State { get; set; } //1 - Follower; 2 - Candidate ; 3 - Leader
-        public int Term { get; set; }
-        public int Timeout { get; set; }
-
-        public Dictionary<string, int>
-            Votes { get; set; } // -1 -> No vote yet received ; 0 -> Received no vote ; 1 -> Received vote
-
-        public string votedFor;
+        private const int minTimeout = 10000;
+        private const int maxTimeout = 20000;
 
         public bool electionTimeout;
 
-        GIGAServerObject server;
+        private GIGAServerObject server;
 
-        public CancellationTokenSource TokenSource { get; set; }
+        public string votedFor;
 
 
         public GIGARaftObject(Dictionary<string, GIGAServerObject> Servers)
@@ -36,38 +24,43 @@ namespace GIGAServer.domain
             Term = 0;
             TokenSource = new CancellationTokenSource();
 
-            Random rnd = new Random();
+            var rnd = new Random();
             Timeout = rnd.Next(minTimeout, maxTimeout);
 
             Votes = new Dictionary<string, int>();
-            foreach (var server in Servers)
-            {
-                Votes.Add(server.Key, -1);
-            }
+            foreach (var server in Servers) Votes.Add(server.Key, -1);
 
             electionTimeout = false;
         }
 
+        public int State { get; set; } //1 - Follower; 2 - Candidate ; 3 - Leader
+        public int Term { get; set; }
+        public int Timeout { get; set; }
+
+        public Dictionary<string, int>
+            Votes { get; set; } // -1 -> No vote yet received ; 0 -> Received no vote ; 1 -> Received vote
+
+        public CancellationTokenSource TokenSource { get; set; }
+
         //Returns -1 - Not enough responses ; 0 - No Majority ; 1 - Majority
         public int CheckMajority()
         {
-            int votesFor = 0;
-            int votesAgainst = 0;
+            var votesFor = 0;
+            var votesAgainst = 0;
 
             foreach (var vote in Votes)
-            {
                 if (vote.Value == 1)
                     votesFor++;
                 else if (vote.Value == 0)
                     votesAgainst++;
-            }
 
             if (votesFor > Votes.Count / 2)
             {
                 Console.WriteLine("Majority achieved");
                 return 1;
             }
-            else if (votesAgainst > Votes.Count / 2)
+
+            if (votesAgainst > Votes.Count / 2)
             {
                 Console.WriteLine("Majority not achieved");
                 return 0;
@@ -76,14 +69,12 @@ namespace GIGAServer.domain
             return -1;
         }
 
-        public void HandleVoteReply(GIGAPartitionProto.VoteReply reply)
+        public void HandleVoteReply(VoteReply reply)
         {
             if (reply.VoteForCandidate)
                 Votes[reply.ServerId] = 1;
             else
-            {
                 Votes[reply.ServerId] = 0;
-            }
         }
 
         public bool VoteReplyDecision(VoteRequest request, GIGAPartitionObject partition)
@@ -101,13 +92,12 @@ namespace GIGAServer.domain
 
         public void AcceptNewLeader(string serverId, int leaderTerm, GIGAPartitionObject partitionObject)
         {
-            if(leaderTerm >= Term)
+            if (leaderTerm >= Term)
             {
                 partitionObject.SetNewMasterServer(serverId);
 
                 ReturnToFollower();
             }
-            
         }
 
         public void ReturnToFollower()
@@ -153,7 +143,7 @@ namespace GIGAServer.domain
 
         public void ResetTimeout()
         {
-            Random rnd = new Random();
+            var rnd = new Random();
             Timeout = rnd.Next(minTimeout, maxTimeout);
         }
     }

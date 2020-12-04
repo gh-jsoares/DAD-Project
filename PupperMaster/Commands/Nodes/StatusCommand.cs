@@ -1,12 +1,11 @@
-﻿using Grpc.Net.Client;
+﻿using System;
+using GIGAPuppetMasterProto;
+using Grpc.Net.Client;
 using PuppetMaster.Commands;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace PuppetMaster.Scripts.Commands
 {
-    class StatusCommand : ICommand
+    internal class StatusCommand : ICommand
     {
         public string Name => "Status";
 
@@ -21,23 +20,17 @@ namespace PuppetMaster.Scripts.Commands
             Console.WriteLine(Args.Length);
 
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            foreach (var entry in PuppetMaster.ClientMap)
-            {
-                SendStatusRequest(entry.Value);
-            }
+            foreach (var entry in PuppetMaster.ClientMap) SendStatusRequest(entry.Value);
 
-            foreach (var entry in PuppetMaster.ServerMap)
-            {
-                SendStatusRequest(entry.Value.Url);
-            }
+            foreach (var entry in PuppetMaster.ServerMap) SendStatusRequest(entry.Value.Url);
         }
 
-        void SendStatusRequest(string url)
+        private void SendStatusRequest(string url)
         {
-            GrpcChannel channel = GrpcChannel.ForAddress(url);
-            GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient client = new GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient(channel);
+            var channel = GrpcChannel.ForAddress(url);
+            var client = new GIGAPuppetMasterService.GIGAPuppetMasterServiceClient(channel);
 
-            GIGAPuppetMasterProto.StatusReply reply = client.StatusService(new GIGAPuppetMasterProto.StatusRequest());
+            var reply = client.StatusService(new StatusRequest());
         }
     }
 }

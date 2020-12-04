@@ -1,15 +1,12 @@
-﻿using GIGAPuppetMasterProto;
+﻿using System;
 using GIGAServer.domain;
-using GIGAServer.dto;
-using System;
-using System.Reflection;
 
 namespace GIGAServer.services
 {
-    class GIGAPuppetMasterService
+    internal class GIGAPuppetMasterService
     {
-        private GIGAServerService gigaServerService;
-        private GIGAPartitionService gigaPartitionService;
+        private readonly GIGAPartitionService gigaPartitionService;
+        private readonly GIGAServerService gigaServerService;
 
         public GIGAPuppetMasterService(GIGAServerService gigaServerService, GIGAPartitionService gigaPartitionService)
         {
@@ -36,6 +33,7 @@ namespace GIGAServer.services
 
             return true;
         }
+
         public bool Freeze()
         {
             return gigaServerService.Freeze();

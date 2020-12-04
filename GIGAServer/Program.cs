@@ -1,23 +1,24 @@
-﻿using Grpc.Core;
-using System;
+﻿using System;
+using GIGAServer.services;
+using Grpc.Core;
 
 namespace GIGAServer
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            int port = 1001;
-            string hostname = "localhost";
-            int minDelay = 0;
-            int maxDelay = 0;
-            string id = "0";
+            var port = 1001;
+            var hostname = "localhost";
+            var minDelay = 0;
+            var maxDelay = 0;
+            var id = "0";
 
-            if(args.Length == 4)
+            if (args.Length == 4)
             {
                 id = args[0];
 
-                Uri uri = new Uri(args[1]);
+                var uri = new Uri(args[1]);
 
                 port = uri.Port;
                 hostname = uri.Host;
@@ -30,19 +31,23 @@ namespace GIGAServer
 
             serverPort = new ServerPort(hostname, port, ServerCredentials.Insecure);
 
-            services.GIGAServerService gigaServerService = new services.GIGAServerService(id, hostname, port, minDelay, maxDelay);
-            services.GIGAPartitionService gigaPartitionService = new services.GIGAPartitionService(gigaServerService);
-            services.GIGAPuppetMasterService gigaPuppetMasterService = new services.GIGAPuppetMasterService(gigaServerService, gigaPartitionService);
-            
+            var gigaServerService = new GIGAServerService(id, hostname, port, minDelay, maxDelay);
+            var gigaPartitionService = new GIGAPartitionService(gigaServerService);
+            var gigaPuppetMasterService = new GIGAPuppetMasterService(gigaServerService, gigaPartitionService);
 
-            Server server = new Server
+
+            var server = new Server
             {
-                Services = {
-                    GIGAServerProto.GIGAServerService.BindService(new grpc.GIGAServerService(gigaServerService, gigaPartitionService)),
-                    GIGAPuppetMasterProto.GIGAPuppetMasterService.BindService(new grpc.GIGAPuppetMasterService(gigaPuppetMasterService)),
-                    GIGAPartitionProto.GIGAPartitionService.BindService(new grpc.GIGAPartitionService(gigaPartitionService))
+                Services =
+                {
+                    GIGAServerProto.GIGAServerService.BindService(
+                        new grpc.GIGAServerService(gigaServerService, gigaPartitionService)),
+                    GIGAPuppetMasterProto.GIGAPuppetMasterService.BindService(
+                        new grpc.GIGAPuppetMasterService(gigaPuppetMasterService)),
+                    GIGAPartitionProto.GIGAPartitionService.BindService(
+                        new grpc.GIGAPartitionService(gigaPartitionService))
                 },
-                Ports = { serverPort }
+                Ports = {serverPort}
             };
 
             server.Start();
@@ -53,7 +58,7 @@ namespace GIGAServer
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
             //Start Raft after everything is setup
-            services.GIGARaftService gigaRaftService = new services.GIGARaftService(gigaPartitionService, gigaServerService);
+            var gigaRaftService = new GIGARaftService(gigaPartitionService, gigaServerService);
 
             Console.WriteLine("Press any key to stop the server...");
             Console.ReadKey();

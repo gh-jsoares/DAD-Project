@@ -1,12 +1,10 @@
-﻿using Grpc.Net.Client;
+﻿using GIGAPuppetMasterProto;
+using Grpc.Net.Client;
 using PuppetMaster.Commands;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace PuppetMaster.Scripts.Commands
 {
-    class UnfreezeCommand : ICommand
+    internal class UnfreezeCommand : ICommand
     {
         public string Name => "Unfreeze";
 
@@ -18,14 +16,12 @@ namespace PuppetMaster.Scripts.Commands
 
         void ICommand.SafeExecute(string[] Args, PuppetMasterLogic PuppetMaster)
         {
-            string url = PuppetMaster.ServerMap[Args[0]].Url;
+            var url = PuppetMaster.ServerMap[Args[0]].Url;
 
-            GrpcChannel channel = GrpcChannel.ForAddress(url);
-            GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient client = new GIGAPuppetMasterProto.GIGAPuppetMasterService.GIGAPuppetMasterServiceClient(channel);
+            var channel = GrpcChannel.ForAddress(url);
+            var client = new GIGAPuppetMasterService.GIGAPuppetMasterServiceClient(channel);
 
-            GIGAPuppetMasterProto.UnfreezeServerReply reply = client.UnfreezeServerService(new GIGAPuppetMasterProto.UnfreezeServerRequest());
-
-
+            var reply = client.UnfreezeServerService(new UnfreezeServerRequest());
         }
     }
 }

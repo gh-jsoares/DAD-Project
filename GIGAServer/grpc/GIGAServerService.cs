@@ -1,18 +1,16 @@
-﻿using GIGAServer.domain;
-using GIGAServerProto;
-using Grpc.Core;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using GIGAServerProto;
+using Grpc.Core;
 using Object = GIGAServerProto.Object;
 
 namespace GIGAServer.grpc
 {
-    class GIGAServerService : GIGAServerProto.GIGAServerService.GIGAServerServiceBase
+    internal class GIGAServerService : GIGAServerProto.GIGAServerService.GIGAServerServiceBase
     {
-        private services.GIGAServerService gigaServerService;
-        private services.GIGAPartitionService gigaPartitionService;
+        private readonly services.GIGAPartitionService gigaPartitionService;
+        private readonly services.GIGAServerService gigaServerService;
 
         public GIGAServerService(services.GIGAServerService gigaServerService,
             services.GIGAPartitionService gigaPartitionService)
@@ -26,11 +24,14 @@ namespace GIGAServer.grpc
             var reply = new ReadReply {Ok = false};
             try
             {
-                GIGAObject obj = gigaPartitionService.Read(request.PartitionId, request.ObjectId);
+                var obj = gigaPartitionService.Read(request.PartitionId, request.ObjectId);
 
                 if (obj != null)
                     reply = new ReadReply
-                        {Value = obj.Value, ObjectId = obj.Name, PartitionId = obj.Partition.Name, Ok = true, Timestamp = obj.Timestamp};
+                    {
+                        Value = obj.Value, ObjectId = obj.Name, PartitionId = obj.Partition.Name, Ok = true,
+                        Timestamp = obj.Timestamp
+                    };
             }
             catch (Exception e)
             {
@@ -63,10 +64,9 @@ namespace GIGAServer.grpc
 
         public override Task<ListServerReply> ListServer(ListServerRequest request, ServerCallContext context)
         {
-            ListServerReply reply = new ListServerReply();
+            var reply = new ListServerReply();
 
             foreach (var partition in gigaPartitionService.ListPartitions())
-            {
                 reply.Partitions.Add(new Partition
                 {
                     PartitionId = partition.Partition.Name,
@@ -82,7 +82,6 @@ namespace GIGAServer.grpc
                         ).ToList()
                     }
                 });
-            }
 
             return Task.FromResult(reply);
         }

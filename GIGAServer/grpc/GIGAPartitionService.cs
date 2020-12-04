@@ -1,17 +1,15 @@
-﻿using GIGAPartitionProto;
-using GIGAServerProto;
-using Grpc.Core;
-using System;
+﻿using System;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
+using GIGAPartitionProto;
 using GIGAServer.domain;
+using Grpc.Core;
 
 namespace GIGAServer.grpc
 {
-    class GIGAPartitionService : GIGAPartitionProto.GIGAPartitionService.GIGAPartitionServiceBase
+    internal class GIGAPartitionService : GIGAPartitionProto.GIGAPartitionService.GIGAPartitionServiceBase
     {
-        private services.GIGAPartitionService gigaPartitionService;
+        private readonly services.GIGAPartitionService gigaPartitionService;
 
         public GIGAPartitionService(services.GIGAPartitionService gigaPartitionService)
         {
@@ -24,7 +22,7 @@ namespace GIGAServer.grpc
 
             Console.WriteLine($"Received vote for partition {request.PartitionId} from server {request.ServerId}");
 
-            bool voteForCandidate = gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject
+            var voteForCandidate = gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject
                 .VoteReplyDecision(request, gigaPartitionService.Partitions[request.PartitionId].Partition);
 
             Console.WriteLine($"{voteForCandidate.ToString()}");
@@ -51,7 +49,8 @@ namespace GIGAServer.grpc
 
             gigaPartitionService.CheckFrozenServerHeartbeat();
 
-            gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.AcceptNewLeader(request.ServerId, request.Term,
+            gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.AcceptNewLeader(request.ServerId,
+                request.Term,
                 gigaPartitionService.Partitions[request.PartitionId].Partition);
 
             gigaPartitionService.Partitions[request.PartitionId].Partition.RaftObject.CheckTerm(request.Term);
@@ -86,15 +85,18 @@ namespace GIGAServer.grpc
 
                 var lastCommittedEntries = request.LastCommittedLogs.Select(lastCommittedLog =>
                     new GIGALogEntry(lastCommittedLog.Term, lastCommittedLog.Log,
-                        new GIGAObject(partitionObject.Partition, lastCommittedLog.ObjectId, lastCommittedLog.Value, lastCommittedLog.Log)));
+                        new GIGAObject(partitionObject.Partition, lastCommittedLog.ObjectId, lastCommittedLog.Value,
+                            lastCommittedLog.Log)));
 
                 GIGALogEntry entry = null;
                 if (request.Entry != null)
                     entry = new GIGALogEntry(request.Entry.Term, request.Entry.Log,
-                        new GIGAObject(partitionObject.Partition, request.Entry.ObjectId, request.Entry.Value, request.Entry.Log));
+                        new GIGAObject(partitionObject.Partition, request.Entry.ObjectId, request.Entry.Value,
+                            request.Entry.Log));
 
 
-                partitionObject.Partition.RaftObject.AcceptNewLeader(request.ServerId, request.Term, partitionObject.Partition);
+                partitionObject.Partition.RaftObject.AcceptNewLeader(request.ServerId, request.Term,
+                    partitionObject.Partition);
                 partitionObject.Partition.RaftObject.CheckTerm(request.Term);
 
                 var lastCommittedLog = partitionObject.Partition.AppendEntries(entry, lastCommittedEntries.ToList());
@@ -103,7 +105,6 @@ namespace GIGAServer.grpc
                 appendEntriesReply.Term = partitionObject.Partition.RaftObject.Term;
 
                 if (lastCommittedLog != null)
-                {
                     appendEntriesReply.LastCommittedLog = new LogEntryProto
                     {
                         Log = lastCommittedLog.Index,
@@ -111,7 +112,6 @@ namespace GIGAServer.grpc
                         Term = lastCommittedLog.Term,
                         Value = lastCommittedLog.Data.Value
                     };
-                }
             }
             catch (Exception e)
             {

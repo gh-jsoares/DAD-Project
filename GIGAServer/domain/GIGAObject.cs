@@ -2,14 +2,9 @@
 
 namespace GIGAServer.domain
 {
-    class GIGAObject
+    internal class GIGAObject
     {
-        public GIGAPartitionObject Partition { get; }
-        public string Name { get; }
         private string _value;
-        public string Value { get => _value; set { if (!Locked) _value = value; } }
-        public bool Locked { get; set; }
-        public int Timestamp { get; set; }
 
         public GIGAObject(GIGAPartitionObject partition, string name, string value, int timestamp)
         {
@@ -19,5 +14,20 @@ namespace GIGAServer.domain
             Locked = false;
             Timestamp = timestamp;
         }
+
+        public GIGAPartitionObject Partition { get; }
+        public string Name { get; }
+
+        public string Value
+        {
+            get => _value;
+            set
+            {
+                if (!Locked) _value = value;
+            }
+        }
+
+        public bool Locked { get; set; }
+        public int Timestamp { get; set; }
     }
 }
